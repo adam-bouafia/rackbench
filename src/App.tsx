@@ -231,8 +231,8 @@ export function App() {
           <a href="#/labs" onClick={link('#/labs')} className={route.page === 'labs' ? 'on' : ''}>
             Run it yourself
           </a>
-          <a href={SITE.repo} target="_blank" rel="noreferrer">
-            GitHub
+          <a href={SITE.labRepo} target="_blank" rel="noreferrer">
+            Lab on GitHub
           </a>
         </nav>
         <button className="btn search-btn" onClick={() => setSearchOpen(true)}>
@@ -288,8 +288,12 @@ export function App() {
             {SITE.author}
           </a>{' '}
           ·{' '}
+          <a href={SITE.labRepo} target="_blank" rel="noreferrer">
+            lab scripts
+          </a>{' '}
+          ·{' '}
           <a href={SITE.repo} target="_blank" rel="noreferrer">
-            source and lab scripts
+            site source
           </a>
         </span>
         <span className="muted">Illustrative traces and simulated numbers. Not affiliated with any hardware vendor.</span>

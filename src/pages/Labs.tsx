@@ -13,7 +13,7 @@ interface Lab {
 
 const SETUP = `# Fedora (or any Linux with KVM and libvirt); you need about 7.5 GB of free memory
 sudo dnf install virt-install qemu-img xorriso jq ipmitool lshw qemu-system-arm
-git clone ${SITE.repo}.git && cd rackbench/lab
+git clone ${SITE.labRepo}.git && cd rackbench/lab
 ./provision-rack.sh            # three Ubuntu nodes, two networks; asks sudo for the disk images
 ./snapshot-rack.sh save clean  # undo anything later with: ./snapshot-rack.sh revert clean
 ./bmc.sh setup && ./bmc.sh start   # emulated BMCs: IPMI on 127.0.0.1:6231-6233, Redfish on :8000
@@ -169,7 +169,7 @@ export function Labs({ go }: { go: (hash: string) => void }) {
       <header className="lesson-head">
         <div className="eyebrow">Hands on</div>
         <h1>Run it yourself</h1>
-        <p className="lead">The lessons on this site have a real counterpart: a three-node rack on KVM with emulated BMCs, a real BMC firmware, network boot and a fault injector, all from the scripts in the repository's lab folder.</p>
+        <p className="lead">The lessons on this site have a real counterpart: a three-node rack on KVM with emulated BMCs, a real BMC firmware, network boot and a fault injector, all from the scripts in the rackbench repository.</p>
       </header>
 
       <CodeBlock code={SETUP} label="Set up the rack" />

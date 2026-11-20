@@ -1,3 +1,17 @@
-.vercel
-.env*
+# dependencies and builds
+node_modules/
+dist/
+.vercel/
+
+# secrets: keys, vouchers and env files never go into git
+.env
+.env.*
 !.env.example
+keys/
+*.pem
+*.key
+
+# editor and OS
+.vscode/
+.idea/
+.DS_Store
