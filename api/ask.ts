@@ -3,7 +3,7 @@
 //
 // Environment (set in the Vercel project settings, or in site/.env.local for `npm run dev`; never in git):
 //   AI_GATEWAY_API_KEY   key created in the Vercel dashboard, AI Gateway tab (on Vercel deployments the
-//                        project's OIDC token works as well, so the key can be left out there)
+//                        project's OIDC token, sent in the x-vercel-oidc-token header, works as well)
 //   ASSISTANT_MODEL      optional, default anthropic/claude-haiku-5.5
 //   ASSISTANT_DAILY_MAX  optional, answers per instance per day, default 300
 //
@@ -55,7 +55,8 @@ interface Body {
 }
 
 export async function POST(request: Request): Promise<Response> {
-  const key = process.env.AI_GATEWAY_API_KEY ?? process.env.VERCEL_OIDC_TOKEN
+  // On Vercel the project's OIDC token arrives as a request header; locally `vercel link` writes it to .env.local.
+  const key = process.env.AI_GATEWAY_API_KEY ?? request.headers.get('x-vercel-oidc-token') ?? process.env.VERCEL_OIDC_TOKEN
   if (!key) return json({ error: 'The assistant is not configured on this deployment.' }, 503)
 
   let body: Body
