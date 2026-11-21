@@ -86,6 +86,8 @@ const Y0 = 24
 const X0 = 64
 const X1 = 392
 const yOf = (u: number) => Y0 + (42 - u) * U_H
+// x of each cable lane in the back view (left to right: BMC, mgmt0, be0, be1)
+const LANE = { oob: 170, mgmt: 214, be0: 268, be1: 312 }
 
 export function RackTour({ meta }: { meta: LessonMeta }) {
   const [side, setSide] = useState<Side>('back')
@@ -132,7 +134,7 @@ export function RackTour({ meta }: { meta: LessonMeta }) {
 
       <div className="rack-grid">
         <div className="card">
-          <svg viewBox="0 0 470 690" className="rack-svg" role="img" aria-label={`Rack rk-01, ${side} view`}>
+          <svg viewBox="0 0 470 690" className="rack-svg" role="img" aria-label={`Rack, ${side} view`}>
             <rect x={X0 - 14} y={Y0 - 10} width={X1 - X0 + 28} height={42 * U_H + 20} rx="6" className="rack-frame" />
             {Array.from({ length: 42 }, (_, i) => 42 - i).map((u) => (
               <g key={u}>
@@ -166,26 +168,48 @@ export function RackTour({ meta }: { meta: LessonMeta }) {
               .map((u) => (
                 <rect key={u} x={X0 + 18} y={yOf(u) + 2} width={X1 - X0 - 36} height={U_H - 4} rx="1.5" className="rack-blank" onClick={() => pick('blank')} />
               ))}
-            {/* Cables in the back view: each server to the switches and to both PDUs. */}
-            {NODES.map((n, i) => {
-              const y = yOf(n.u) + U_H / 2
-              const lane = X1 + 18 + i * 9
-              return (
-                <g key={n.id} className="rack-cables">
-                  {show('oob') && <polyline points={`${X1 - 40},${y} ${lane},${y} ${lane},${yOf(42) + 3} ${X1 - 40},${yOf(42) + 3}`} stroke={cableColor.oob} />}
-                  {show('mgmt') && <polyline points={`${X1 - 52},${y + 2} ${lane + 3},${y + 2} ${lane + 3},${yOf(42) + 7} ${X1 - 60},${yOf(42) + 7}`} stroke={cableColor.mgmt} />}
-                  {show('backend') && <polyline points={`${X1 - 70},${y - 2} ${lane - 3},${y - 2} ${lane - 3},${yOf(41) + 5} ${X1 - 80},${yOf(41) + 5}`} stroke={cableColor.backend} />}
-                  {show('power') && (
-                    <>
-                      <line x1={X0 + 22} y1={y} x2={X0 + 14} y2={y} stroke={cableColor.power} />
-                      <line x1={X1 - 22} y1={y + 3} x2={X1 - 14} y2={y + 3} stroke={cableColor.power} />
-                    </>
-                  )}
-                </g>
-              )
-            })}
+            {/* Cables in the back view. Each network has its own lane and each server its own offset in it,
+                so no two cables share a line; power cords go sideways to PDU A and PDU B. */}
+            {side === 'back' &&
+              NODES.map((n, i) => {
+                const yTop = yOf(n.u) + 2
+                const dim = sel !== n.id && NODES.some((m) => m.id === sel) ? ' is-dim' : ''
+                const lanes: { net: Net; x: number; to: number }[] = [
+                  { net: 'oob', x: LANE.oob + i * 7, to: yOf(42) + U_H - 2 },
+                  { net: 'mgmt', x: LANE.mgmt + i * 7, to: yOf(42) + U_H - 2 },
+                  { net: 'backend', x: LANE.be0 + i * 7, to: yOf(41) + U_H - 2 },
+                  { net: 'backend', x: LANE.be1 + i * 7, to: yOf(41) + U_H - 2 },
+                ]
+                return (
+                  <g key={n.id} className={`rack-cables${dim}`}>
+                    {lanes.map((l, k) =>
+                      show(l.net) ? (
+                        <g key={k}>
+                          <line x1={l.x} y1={yTop} x2={l.x} y2={l.to} stroke={cableColor[l.net]} />
+                          <rect x={l.x - 2.5} y={yTop - 1} width={5} height={5} rx={1} fill={cableColor[l.net]} />
+                          <rect x={l.x - 2.5} y={l.to - 4} width={5} height={5} rx={1} fill={cableColor[l.net]} />
+                        </g>
+                      ) : null,
+                    )}
+                    {show('power') && (
+                      <>
+                        <polyline points={`${X0 + 24},${yOf(n.u) + 5} ${X0 + 16 - i * 0},${yOf(n.u) + 5}`} stroke={cableColor.power} />
+                        <polyline points={`${X1 - 24},${yOf(n.u) + 10} ${X1 - 16},${yOf(n.u) + 10}`} stroke={cableColor.power} />
+                      </>
+                    )}
+                  </g>
+                )
+              })}
+            {side === 'back' && (
+              <g className="rack-lane-labels">
+                {show('oob') && <text x={LANE.oob + 7} y={yOf(30)} textAnchor="middle">BMC</text>}
+                {show('mgmt') && <text x={LANE.mgmt + 7} y={yOf(30)} textAnchor="middle">mgmt0</text>}
+                {show('backend') && <text x={LANE.be0 + 7} y={yOf(30)} textAnchor="middle">be0</text>}
+                {show('backend') && <text x={LANE.be1 + 7} y={yOf(30)} textAnchor="middle">be1</text>}
+              </g>
+            )}
             <text x={(X0 + X1) / 2} y={Y0 + 42 * U_H + 30} textAnchor="middle" className="rack-small">
-              Rack rk-01, 42U, {side} view. Click any device.
+              42U rack, {side} view. Click any device.
             </text>
           </svg>
         </div>

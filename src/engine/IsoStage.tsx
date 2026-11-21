@@ -23,6 +23,13 @@ const KIND: Record<ActorKind, { w: number; h: number; tone: Tone }> = {
 }
 const DEPTH = 0.58
 const TALL = 40 // blocks at least this high carry their name on the block
+// The name sits just below the centre of the top face, where the diamond is still wide. Its size is
+// chosen so the text stays inside the face: the face narrows toward the front corner.
+const NAME_BASE = 9
+const nameSize = (label: string, w: number, d: number) => {
+  const room = w * (1 - NAME_BASE / (d / 2)) * 0.86
+  return Math.max(9, Math.min(15, room / (label.length * 0.62)))
+}
 
 type Pt = [number, number]
 const add = (a: Pt, b: Pt, k = 1): Pt => [a[0] + b[0] * k, a[1] + b[1] * k]
@@ -89,15 +96,13 @@ function Block({ a, active }: { a: Actor; active: boolean }) {
       <polygon points={pts([T, R, B, L])} className="iso-face" fill={`url(#g-t-${tone})`} />
       {details}
       {screen}
-      <g className="iso-icon" transform={`translate(${x - 14} ${y - h - (tall ? 30 : 14)})`}>
+      <g className="iso-icon" transform={`translate(${x - 14} ${y - h - (tall ? d / 4 + 12 : 14)})`}>
         <ActorIcon kind={a.kind} x={0} y={0} />
       </g>
       {tall && (
-        <>
-          <text x={x} y={y - h + 20} textAnchor="middle" className="iso-node-name">
-            {a.label}
-          </text>
-        </>
+        <text x={x} y={y - h + NAME_BASE} textAnchor="middle" className="iso-node-name" style={{ fontSize: nameSize(a.label, w, d) }}>
+          {a.label}
+        </text>
       )}
     </g>
   )

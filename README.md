@@ -2,7 +2,7 @@
 
 **A data center rack, from order to shipping.**
 
-Walk through the life of a data center rack: build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, write the report and ship it. You learn it in the browser with 25 animated lessons and a game, then do it for real on a three-node rack you run yourself.
+Walk through the life of a data center rack: build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, write the report and ship it. In the browser you zoom into a data center, step through 25 animated lessons and play a rack-building game; then you do it for real on a three-node rack you run yourself.
 
 **Live: https://rackbench.vercel.app**
 
@@ -10,6 +10,7 @@ Walk through the life of a data center rack: build it from the order, check ever
 
 ## What you can do
 
+- **Explore a data center.** Zoom from the data hall (rows of racks, hot and cold aisles with containment, CRAH cooling units, UPS and batteries, overhead busways, a staging area) into one row, one rack and one server with the lid off. Every part says what it does and how it is tested, and opens the lessons about it.
 - **Learn.** 25 lessons in seven chapters, from what is inside a two-socket server to GPU racks: Foundations, Server architecture, Out of band (the BMC), Boot and firmware, Rack networking, Testing a rack, Deep dives. A step-through lesson draws the devices as isometric blocks, sends each message along its route with a travelling packet, updates live metrics and explains every step with the decoded fields and the raw output. Each one has a Diagram, a Sequence and a Packets view, with Replay and Pause.
 - **Play Rack Shift.** One shift on a rack integration floor, three orders: an edge rack, a storage rack and a GPU rack. For each one you build the rack by the placement rules, check every cable against the plan with LLDP, power it on and check every server against the order and the firmware baseline, burn it in and read the results against the test plan, fix and retest, then write the report with evidence and root cause and ship it. The faults change every shift, and QA shows you what you missed.
 - **Practice.** A fault hunt (one hidden fault in a simulated rack, a terminal, the clock) and a 15-question quiz.
@@ -29,6 +30,10 @@ Every page fits one screen. Next to the search are buttons to hide the course, s
 | Rack Shift, Build: the placement rules say what is wrong | Rack Shift, Burn-in: one drive 31% under the median |
 | ![Dark theme: the GPU server lesson](docs/screenshots/dark.webp) | ![Rack Lab: a 24U rack checked against the integration rules](docs/screenshots/racklab.webp) |
 | Dark theme: GPU servers, what changes | Rack Lab: free rack building with power checks |
+| ![Data center explorer: the data hall](docs/screenshots/dc-hall.webp) | ![Data center explorer: row B with its aisles, busways and cable tray](docs/screenshots/dc-row.webp) |
+| Data center explorer: the data hall | One row: cold aisle in front, hot aisle behind, power and fiber above |
+| ![Data center explorer: a 42U rack from the front](docs/screenshots/dc-rack.webp) | ![Data center explorer: a server from the top, BMC selected](docs/screenshots/dc-server.webp) |
+| One rack: switches on top, servers, blanking panels, PDUs | One server with the lid off: every part clickable |
 
 ## The lab behind it
 
@@ -70,6 +75,7 @@ src/lessons/    lesson list, step-through content (flows.ts, flows2.ts, flows3.t
 src/widgets/    the interactive lessons
 src/hunt/       the fault-hunt simulator and its terminal
 src/game/       Rack Shift: orders, faults and scoring (shift.ts), the screen (RackShift.tsx)
+src/explore/    the data center explorer: zoom levels, parts and drawings
 src/pages/      overview, practice and quiz, Rack Lab, cheatsheets, lab guide
 src/i18n.ts     interface strings in English, French and Dutch
 api/ask.ts      the assistant function

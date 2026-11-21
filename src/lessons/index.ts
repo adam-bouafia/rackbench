@@ -32,7 +32,7 @@ export const LESSONS: LessonMeta[] = [
     id: 'rack-tour',
     chapter: 'found',
     title: 'Tour of the rack',
-    blurb: 'Front and back of a small rack: servers, switches, power feeds and every cable, with the cabling table a rack engineer works from.',
+    blurb: 'Front and back of a rack: servers, switches, power feeds and every cable, with the cabling table a rack engineer works from.',
     kind: 'widget',
     keywords: ['rack', 'cabling', 'pdu', 'power', 'switch', 'rack unit', 'airflow'],
     lab: 'Lab 1',

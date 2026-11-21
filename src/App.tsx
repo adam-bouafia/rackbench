@@ -12,6 +12,7 @@ import { BondFailover } from './widgets/BondFailover'
 import { TestTypes } from './widgets/TestTypes'
 import { Home } from './pages/Home'
 import { Labs } from './pages/Labs'
+import { DataCenter } from './explore/DataCenter'
 import { Practice } from './pages/Practice'
 import { RackLab } from './pages/RackLab'
 import { Cheatsheets, SHEETS } from './pages/Cheatsheets'
@@ -37,6 +38,7 @@ type Route =
   | { page: 'lab' }
   | { page: 'sheets' }
   | { page: 'labs' }
+  | { page: 'explore'; path: string[] }
   | { page: 'missing' }
 
 function parse(hash: string): Route {
@@ -48,6 +50,7 @@ function parse(hash: string): Route {
   if (h === '/lab') return { page: 'lab' }
   if (h === '/cheatsheets') return { page: 'sheets' }
   if (h === '/labs') return { page: 'labs' }
+  if (h === '/explore' || h.startsWith('/explore/')) return { page: 'explore', path: h.split('/').slice(2).filter(Boolean) }
   const m = h.match(/^\/lesson\/([\w-]+)$/)
   if (m && lessonById(m[1])) return { page: 'lesson', id: m[1] }
   return { page: 'missing' }
@@ -108,6 +111,7 @@ function Search({ go }: { go: (h: string) => void }) {
       { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
       { hash: '#/practice/quiz', title: 'Quiz', sub: '15 questions from real rack work', kind: 'Practice', hay: 'quiz questions test interview' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
+      { hash: '#/explore', title: 'Data center explorer', sub: 'Zoom from the data hall into a row, a rack and a server', kind: 'Explore', hay: 'data center hall row rack server aisle cooling power ups crah busway explore zoom' },
       { hash: '#/labs', title: 'Run it yourself', sub: 'Labs 0 to 11 on the real rack', kind: 'Lab', hay: 'labs install setup hands on scripts' },
       ...SHEETS.flatMap((s) => s.entries.map((e) => ({ hash: '#/cheatsheets', title: e.cmd, sub: `${s.title}: ${e.what}`, kind: 'Command', hay: `${e.cmd} ${e.what} ${s.title}` }))),
     ],
@@ -240,6 +244,11 @@ function CourseNav({ route, link }: { route: Route; link: (h: string) => (e: Mou
               <li>
                 <a href="#/overview" onClick={link('#/overview')} className={route.page === 'home' ? 'on' : ''}>
                   {t('overview')}
+                </a>
+              </li>
+              <li>
+                <a href="#/explore" onClick={link('#/explore')} className={route.page === 'explore' ? 'on' : ''}>
+                  Data center explorer
                 </a>
               </li>
               <li>
@@ -377,7 +386,7 @@ export function App() {
     setNavOpen(false)
     document.querySelector('.main')?.scrollTo({ top: 0 })
     const lesson = route.page === 'lesson' ? lessonById(route.id) : null
-    const titles: Record<string, string> = { practice: 'Practice', lab: 'Rack Lab', sheets: 'Cheatsheets', labs: 'Run it yourself' }
+    const titles: Record<string, string> = { practice: 'Practice', lab: 'Rack Lab', sheets: 'Cheatsheets', labs: 'Run it yourself', explore: 'Data center explorer' }
     document.title = lesson ? `${lesson.title} · ${SITE.title}` : titles[route.page] ? `${titles[route.page]} · ${SITE.title}` : SITE.title
     setAssistantContext(lesson ? { page: lesson.title, text: lesson.blurb } : { page: route.page, text: '' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -414,6 +423,7 @@ export function App() {
     else if (route.page === 'lab') main = <RackLab />
     else if (route.page === 'sheets') main = <Cheatsheets />
     else if (route.page === 'labs') main = <Labs go={go} />
+    else if (route.page === 'explore') main = <DataCenter go={go} path={route.path} />
     else
       main = (
         <div className="page">

@@ -1,6 +1,7 @@
 import { useEffect, useState, type MouseEvent } from 'react'
 import type { Flow } from '../engine/types'
 import { IsoStage } from '../engine/IsoStage'
+import { DataCenterMini } from '../explore/DataCenter'
 import { CHAPTERS, LESSONS } from '../lessons/index'
 import { useDone } from '../progress'
 import { SITE } from '../site'
@@ -51,7 +52,7 @@ const REAL: [string, string, string][] = [
 
 export function Home({ go }: { go: (hash: string) => void }) {
   const done = useDone()
-  const [tab, setTab] = useState<'map' | 'real'>('map')
+  const [tab, setTab] = useState<'dc' | 'map' | 'real'>('dc')
   const [cur, setCur] = useState(0)
   const [paused, setPaused] = useState(false)
   useEffect(() => {
@@ -76,11 +77,11 @@ export function Home({ go }: { go: (hash: string) => void }) {
           <a className="btn btn-primary" href={`#/lesson/${next.id}`} onClick={link(`#/lesson/${next.id}`)}>
             {count ? 'Continue the course' : 'Start the course'} →
           </a>
+          <a className="btn" href="#/explore" onClick={link('#/explore')}>
+            Explore a data center
+          </a>
           <a className="btn" href="#/practice" onClick={link('#/practice')}>
             Play Rack Shift
-          </a>
-          <a className="btn" href="#/labs" onClick={link('#/labs')}>
-            Run the lab
           </a>
         </div>
         <div className="ov-progress">
@@ -98,8 +99,11 @@ export function Home({ go }: { go: (hash: string) => void }) {
 
       <section className="panel ov-map">
         <div className="ov-map-head">
-          <h2 className="panel-title">The lab behind the lessons</h2>
+          <h2 className="panel-title">{tab === 'dc' ? 'Inside a data center' : 'The lab behind the lessons'}</h2>
           <div className="seg" role="tablist">
+            <button className={tab === 'dc' ? 'on' : ''} onClick={() => setTab('dc')}>
+              Data center
+            </button>
             <button className={tab === 'map' ? 'on' : ''} onClick={() => setTab('map')}>
               Lab map
             </button>
@@ -113,7 +117,11 @@ export function Home({ go }: { go: (hash: string) => void }) {
             </button>
           )}
         </div>
-        {tab === 'map' ? (
+        {tab === 'dc' ? (
+          <div className="ov-map-svg">
+            <DataCenterMini go={go} />
+          </div>
+        ) : tab === 'map' ? (
           <div className="ov-map-svg">
             <IsoStage flow={LAB_MAP} cur={cur} paused={paused} replayKey={0} />
           </div>

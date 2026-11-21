@@ -9,11 +9,11 @@ const rackJourney: Flow = {
     'The industry names the levels: L10 is one complete, tested server; L11 is a cabled rack tested as a rack; L12 is several racks tested as one cluster.',
   ],
   actors: [
-    { id: 'cust', label: 'Customer', sub: 'order and BOM', x: 100, y: 330, kind: 'person' },
-    { id: 'build', label: 'Build area', sub: 'L10: each server', x: 380, y: 130, kind: 'server' },
-    { id: 'rack', label: 'Rack rk-01', sub: 'L11: cabled rack', x: 660, y: 330, kind: 'service' },
-    { id: 'test', label: 'Test station', sub: 'the test kit', x: 940, y: 130, kind: 'laptop' },
-    { id: 'report', label: 'Test report', sub: 'per node and rack', x: 1220, y: 330, kind: 'os' },
+    { id: 'cust', label: 'Customer', sub: 'order and BOM', x: 120, y: 330, kind: 'person' },
+    { id: 'build', label: 'Build area', sub: 'L10: each server', x: 330, y: 150, kind: 'server' },
+    { id: 'rack', label: 'Rack', sub: 'L11: cabled rack', x: 540, y: 330, kind: 'service' },
+    { id: 'test', label: 'Test station', sub: 'the test kit', x: 750, y: 150, kind: 'laptop' },
+    { id: 'report', label: 'Report', sub: 'per node and rack', x: 960, y: 330, kind: 'os' },
   ],
   links: [
     ['cust', 'build'],
