@@ -77,7 +77,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
             {count ? 'Continue the course' : 'Start the course'} →
           </a>
           <a className="btn" href="#/practice" onClick={link('#/practice')}>
-            Fault hunt
+            Play Rack Shift
           </a>
           <a className="btn" href="#/labs" onClick={link('#/labs')}>
             Run the lab
@@ -175,10 +175,10 @@ export function Home({ go }: { go: (hash: string) => void }) {
           </div>
           <ul>
             {[
-              ['#/practice', 'Fault hunt: find the broken node'],
+              ['#/practice', 'Rack Shift: build, test and ship racks'],
+              ['#/practice/hunt', 'Fault hunt: find the broken node'],
               ['#/practice/quiz', 'Quiz: 15 questions'],
               ['#/lab', 'Rack Lab: build and power a rack'],
-              ['#/cheatsheets', 'Cheatsheets: every command'],
               ['#/labs', 'Run it yourself: 13 labs'],
             ].map(([h, t]) => (
               <li key={h}>

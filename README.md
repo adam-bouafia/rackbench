@@ -5,7 +5,7 @@ An interactive site about how server racks are tested before they ship: BMCs, IP
 One screen, four sections:
 
 - Learn: a course of 25 lessons in seven coloured chapters (Foundations, Server architecture, the BMC, Boot and firmware, Rack networking, Testing a rack, Deep dives), with progress kept in the browser. Step-through lessons show devices as isometric blocks that appear when they join the story, the current message as an arrow with a travelling packet, metrics that update per step, a stepper, and a side panel with the explanation, a key idea, what changed, the decoded fields and "You'll learn". New in the deep dives: disks and RAID, heat and power, LLDP cabling checks, writing a test script, Windows and PowerShell on the test bench, BIOS and OS tuning. Interactive lessons: the five kinds of tests, a rack tour with the cabling table, DIMM population and NUMA, PCIe link width, a BOM check, the burn-in outlier rule, jumbo frames, bond failover.
-- Practice: a fault-hunt game (a simulated rack with one hidden fault and a terminal) and a 15-question quiz.
+- Practice: Rack Shift, a game of one shift on a rack integration floor: three orders (edge, storage, GPU), and for each rack you build it by the placement rules, check every cable against the plan with LLDP, power it on and check each server against the order, burn it in and read the results against the test plan, fix and retest, then write the report with evidence and root cause and ship it. Faults are random per shift (`src/game/shift.ts`). Also a fault-hunt game (a simulated rack with one hidden fault and a terminal) and a 15-question quiz.
 - Rack Lab: build a 24U rack and check it against integration rules: redundant feeds, the 80% power rule, switches on top, heavy servers low, blanking panels.
 - Cheatsheets: ipmitool, Redfish, inventory, burn-in, network, boot, drives and power, Windows and PowerShell, cabling, and the rackbench lab commands, filterable, one click to copy.
 - Overview: an animated map of the lab, the chapters with progress, and a table of what is real and what is emulated.
@@ -50,6 +50,7 @@ src/engine/     lesson layout, isometric diagram (IsoStage), sequence view
 src/lessons/    lesson list, step-through content (flows.ts, flows2.ts, flows3.ts) and its metrics and labels (extras.ts)
 src/widgets/    the interactive lessons
 src/hunt/       the fault-hunt simulator and its terminal
+src/game/       Rack Shift: orders, faults and scoring (shift.ts), the screen (RackShift.tsx)
 src/pages/      overview, practice and quiz, Rack Lab, cheatsheets, lab guide
 src/i18n.ts     interface strings in English, French and Dutch
 api/ask.ts      the assistant function

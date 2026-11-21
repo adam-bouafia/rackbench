@@ -33,7 +33,7 @@ const WIDGETS: Record<string, ComponentType<{ meta: LessonMeta }>> = {
 type Route =
   | { page: 'home' }
   | { page: 'lesson'; id: string }
-  | { page: 'practice'; tab: 'hunt' | 'quiz' }
+  | { page: 'practice'; tab: 'shift' | 'hunt' | 'quiz' }
   | { page: 'lab' }
   | { page: 'sheets' }
   | { page: 'labs' }
@@ -43,7 +43,8 @@ function parse(hash: string): Route {
   const h = hash.replace(/^#/, '') || '/'
   if (h === '/' || h === '') return { page: 'lesson', id: LESSONS[0].id }
   if (h === '/overview') return { page: 'home' }
-  if (h === '/practice' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
+  if (h === '/practice' || h === '/practice/shift' || h === '/shift') return { page: 'practice', tab: 'shift' }
+  if (h === '/practice/hunt' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
   if (h === '/practice/quiz') return { page: 'practice', tab: 'quiz' }
   if (h === '/lab') return { page: 'lab' }
   if (h === '/cheatsheets') return { page: 'sheets' }
@@ -104,7 +105,8 @@ function Search({ go }: { go: (h: string) => void }) {
   const all = useMemo<(Hit & { hay: string })[]>(
     () => [
       ...LESSONS.map((l) => ({ hash: `#/lesson/${l.id}`, title: l.title, sub: l.blurb, kind: 'Lesson', hay: `${l.title} ${l.blurb} ${l.keywords.join(' ')}` })),
-      { hash: '#/practice', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
+      { hash: '#/practice', title: 'Rack Shift', sub: 'Game: build, cable, test and ship three racks', kind: 'Practice', hay: 'rack shift game build cable burn-in report ship integration play' },
+      { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
       { hash: '#/practice/quiz', title: 'Quiz', sub: '15 questions from real rack work', kind: 'Practice', hay: 'quiz questions test interview' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
       { hash: '#/labs', title: 'Run it yourself', sub: 'Labs 0 to 11 on the real rack', kind: 'Lab', hay: 'labs install setup hands on scripts' },
@@ -313,7 +315,7 @@ function CourseNav({ route, link }: { route: Route; link: (h: string) => (e: Mou
               <span className="dot" style={{ background: 'var(--c-practice)' }} />
               <span className="pl-name">Practice</span>
               <span className="pl-n">
-                {['fault-hunt', 'quiz', 'rack-lab'].filter((id) => done.includes(id)).length}/3
+                {['rack-shift', 'fault-hunt', 'quiz', 'rack-lab'].filter((id) => done.includes(id)).length}/4
               </span>
             </li>
           </ul>
