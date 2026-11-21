@@ -15,8 +15,9 @@ import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { FLOWS as BASE } from '../src/lessons/flows.ts'
 import { FLOWS2 } from '../src/lessons/flows2.ts'
+import { FLOWS3 } from '../src/lessons/flows3.ts'
 
-const FLOWS = { ...BASE, ...FLOWS2 }
+const FLOWS = { ...BASE, ...FLOWS2, ...FLOWS3 }
 
 const here = dirname(fileURLToPath(import.meta.url))
 const site = join(here, '..')

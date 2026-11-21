@@ -1,13 +1,14 @@
 import type { Proto, StepTag } from '../engine/types'
 import { FLOWS as BASE } from './flows'
 import { FLOWS2 } from './flows2'
+import { FLOWS3 } from './flows3'
 import { EXTRAS } from './extras'
 
 // The step-through lessons with their presentation extras merged in. flows.ts stays free of runtime
 // imports so that scripts/narrate.ts can load it directly with Node.
 const defaultTag = (p: Proto): StepTag => (p === 'Board' || p === 'Event' ? 'event' : p === 'Tool' ? 'action' : p === 'Local' ? 'result' : 'message')
 
-const ALL = { ...BASE, ...FLOWS2 }
+const ALL = { ...BASE, ...FLOWS2, ...FLOWS3 }
 
 for (const [id, flow] of Object.entries(ALL)) {
   const x = EXTRAS[id]
