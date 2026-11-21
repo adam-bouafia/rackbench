@@ -41,8 +41,7 @@ type Route =
 
 function parse(hash: string): Route {
   const h = hash.replace(/^#/, '') || '/'
-  if (h === '/' || h === '') return { page: 'lesson', id: LESSONS[0].id }
-  if (h === '/overview') return { page: 'home' }
+  if (h === '/' || h === '' || h === '/overview') return { page: 'home' }
   if (h === '/practice' || h === '/practice/shift' || h === '/shift') return { page: 'practice', tab: 'shift' }
   if (h === '/practice/hunt' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
   if (h === '/practice/quiz') return { page: 'practice', tab: 'quiz' }

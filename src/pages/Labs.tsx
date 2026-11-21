@@ -14,7 +14,7 @@ interface Lab {
 
 const SETUP = `# Fedora (or any Linux with KVM and libvirt); you need about 7.5 GB of free memory
 sudo dnf install virt-install qemu-img xorriso jq ipmitool lshw qemu-system-arm
-git clone ${SITE.labRepo}.git && cd rackbench/lab
+git clone ${SITE.labRepo}.git && cd rackbench-lab/lab
 ./provision-rack.sh            # three Ubuntu nodes, two networks; asks sudo for the disk images
 ./snapshot-rack.sh save clean  # undo anything later with: ./snapshot-rack.sh revert clean
 ./bmc.sh setup && ./bmc.sh start   # emulated BMCs: IPMI on 127.0.0.1:6231-6233, Redfish on :8000
@@ -193,7 +193,7 @@ export function Labs({ go }: { go: (hash: string) => void }) {
         {!lab ? (
           <>
             <h2>Set up the rack</h2>
-            <p>Fedora or any Linux with KVM and libvirt, about 7.5 GB of free memory, Node.js only for this site. The scripts live in the rackbench repository.</p>
+            <p>Fedora or any Linux with KVM and libvirt and about 7.5 GB of free memory. The scripts live in the <a href={SITE.labRepo} target="_blank" rel="noreferrer">rackbench-lab</a> repository.</p>
             <CodeBlock code={SETUP} label="Set up" />
             <h3 className="panel-sub">Scripts</h3>
             <div className="lab-scripts">

@@ -1,4 +1,4 @@
-// POST /api/ask: the "Ask the rack" assistant of Rackbench Explorer.
+// POST /api/ask: the "Ask the rack" assistant of Rackbench.
 // Runs as a Vercel Function. It calls a model through the Vercel AI Gateway (OpenAI-compatible API).
 //
 // Environment (set in the Vercel project settings, or in site/.env.local for `npm run dev`; never in git):
@@ -17,7 +17,7 @@ const GATEWAY = 'https://ai-gateway.vercel.sh/v1/chat/completions'
 const PER_MINUTE = 6
 const PER_DAY = 40
 
-const SYSTEM = `You are the tutor of Rackbench Explorer, an interactive site that teaches how server racks are tested before they ship: BMCs, IPMI and Redfish, PXE and iPXE network boot, BIOS and BMC firmware updates, BOM checks, burn-in with stress-ng, fio and iperf3, bonds, VLANs and jumbo frames, the system event log, and fault isolation. The site's lab ("rackbench") is three Ubuntu VMs on KVM (rk-n1..rk-n3) with virtualbmc and sushy-tools as BMCs, OpenBMC in QEMU, an iPXE boot server and a fault injector (lab/faults.sh).
+const SYSTEM = `You are the tutor of Rackbench, an interactive site that teaches how server racks are tested before they ship: BMCs, IPMI and Redfish, PXE and iPXE network boot, BIOS and BMC firmware updates, BOM checks, burn-in with stress-ng, fio and iperf3, bonds, VLANs and jumbo frames, the system event log, and fault isolation. The site's lab ("rackbench") is three Ubuntu VMs on KVM (rk-n1..rk-n3) with virtualbmc and sushy-tools as BMCs, OpenBMC in QEMU, an iPXE boot server and a fault injector (lab/faults.sh).
 
 Answer the question in plain English, briefly (at most about 180 words), concretely, with the exact command or field name when it helps. Use plain text, no Markdown headings. If the question is outside servers, networking, Linux or testing, say that you only help with this site's topics. If you are not sure, say so rather than guessing. Never invent vendor-specific commands or options; say "check the vendor's guide" instead.`
 

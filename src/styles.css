@@ -1,4 +1,4 @@
-/* Rackbench Explorer. Colours are tokens on :root, redefined for dark mode. */
+/* Rackbench. Colours are tokens on :root, redefined for dark mode. */
 :root {
   --bg: #f5f7fa;
   --panel: #ffffff;
@@ -2814,3 +2814,10 @@ button.chip-lab.is-on { background: var(--green); color: var(--ink); }
 @media (max-width: 1440px) { .rs-body { grid-template-columns: 190px minmax(0, 1fr) 270px; } }
 @media (max-width: 1300px) { .rs-grid { font-size: 11px; } .rs-grid th, .rs-grid td { padding: 4px 4px; } }
 @media (max-width: 1080px) { .rs-main { order: -1; } }
+@media (max-height: 820px) and (min-width: 1081px) {
+  .ov-hero { gap: 9px; }
+  .ov-hero .lead { font-size: 13px; line-height: 1.5; }
+}
+@media (max-height: 790px) and (min-width: 1081px) {
+  .ov-hero .eyebrow { display: none; }
+}

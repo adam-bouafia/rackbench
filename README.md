@@ -1,36 +1,42 @@
-# Rackbench Explorer
+# Rackbench
 
-An interactive site about how server racks are tested before they ship: BMCs, IPMI and Redfish, network boot, firmware updates, burn-in, network tests and fault finding. Live at https://rackbench.vercel.app
+**A data center rack, from order to shipping.**
 
-![A lesson: powering on a server over IPMI, step by step](docs/screenshots/lesson.webp)
+Walk through the life of a data center rack: build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, write the report and ship it. You learn it in the browser with 25 animated lessons and a game, then do it for real on a three-node rack you run yourself.
 
-One screen, four sections:
+**Live: https://rackbench.vercel.app**
 
-- Learn: a course of 25 lessons in seven coloured chapters (Foundations, Server architecture, the BMC, Boot and firmware, Rack networking, Testing a rack, Deep dives), with progress kept in the browser. Step-through lessons show devices as isometric blocks that appear when they join the story, the current message as an arrow with a travelling packet, metrics that update per step, a stepper, and a side panel with the explanation, a key idea, what changed, the decoded fields and "You'll learn". New in the deep dives: disks and RAID, heat and power, LLDP cabling checks, writing a test script, Windows and PowerShell on the test bench, BIOS and OS tuning. Interactive lessons: the five kinds of tests, a rack tour with the cabling table, DIMM population and NUMA, PCIe link width, a BOM check, the burn-in outlier rule, jumbo frames, bond failover.
-- Practice: Rack Shift, a game of one shift on a rack integration floor: three orders (edge, storage, GPU), and for each rack you build it by the placement rules, check every cable against the plan with LLDP, power it on and check each server against the order, burn it in and read the results against the test plan, fix and retest, then write the report with evidence and root cause and ship it. Faults are random per shift (`src/game/shift.ts`). Also a fault-hunt game (a simulated rack with one hidden fault and a terminal) and a 15-question quiz.
-- Rack Lab: build a 24U rack and check it against integration rules: redundant feeds, the 80% power rule, switches on top, heavy servers low, blanking panels.
-- Cheatsheets: ipmitool, Redfish, inventory, burn-in, network, boot, drives and power, Windows and PowerShell, cabling, and the rackbench lab commands, filterable, one click to copy.
-- Overview: an animated map of the lab, the chapters with progress, and a table of what is real and what is emulated.
-- Run it yourself: the setup and the 13 labs of the rackbench repository, one at a time.
+![Rackbench: the lab map, the seven chapters and the way in](docs/screenshots/overview.webp)
 
-Each step-through lesson has three views: the isometric diagram (the route draws itself, then a packet loops along it; Replay restarts the step, Pause freezes it), a sequence diagram, and a packet list in the style of a capture tool. The site opens straight into the first lesson, and every page fits the screen without scrolling (panels scroll inside); next to the search are buttons to hide the course, show the diagram only, go full screen and list the keyboard shortcuts. Search (Ctrl K) covers lessons and commands; the interface switches between English, French and Dutch (lesson texts are English); light and dark themes; JetBrains Mono throughout (SIL Open Font License, `public/fonts/OFL.txt`).
+## What you can do
 
-Every lesson has a hands-on counterpart in the lab: https://github.com/adam-bouafia/rackbench, a three-node rack on KVM with emulated BMCs, OpenBMC in QEMU, network boot and a fault injector.
+- **Learn.** 25 lessons in seven chapters, from what is inside a two-socket server to GPU racks: Foundations, Server architecture, Out of band (the BMC), Boot and firmware, Rack networking, Testing a rack, Deep dives. A step-through lesson draws the devices as isometric blocks, sends each message along its route with a travelling packet, updates live metrics and explains every step with the decoded fields and the raw output. Each one has a Diagram, a Sequence and a Packets view, with Replay and Pause.
+- **Play Rack Shift.** One shift on a rack integration floor, three orders: an edge rack, a storage rack and a GPU rack. For each one you build the rack by the placement rules, check every cable against the plan with LLDP, power it on and check every server against the order and the firmware baseline, burn it in and read the results against the test plan, fix and retest, then write the report with evidence and root cause and ship it. The faults change every shift, and QA shows you what you missed.
+- **Practice.** A fault hunt (one hidden fault in a simulated rack, a terminal, the clock) and a 15-question quiz.
+- **Rack Lab.** Build a 24U rack freely and check it against the integration rules: redundant feeds, the 80% power rule, switches on top, heavy servers low, blanking panels.
+- **Cheatsheets.** ipmitool, Redfish, inventory, burn-in, network, boot, drives and power, Windows and PowerShell, cabling: filterable, one click to copy.
+- **Run it yourself.** 13 hands-on labs, step by step, on the real three-node rack of [rackbench-lab](https://github.com/adam-bouafia/rackbench-lab).
 
-The traces are illustrative and the numbers simulated. Not affiliated with any hardware vendor.
+Every page fits one screen. Next to the search are buttons to hide the course, show the diagram only, go full screen and list the keyboard shortcuts. Search (Ctrl K) covers lessons and commands; the interface switches between English, French and Dutch (the lessons are in English); light and dark themes.
 
 ## Screenshots
 
 | | |
 |---|---|
-| ![Overview: the lab map and the seven chapters](docs/screenshots/overview.webp) | ![Packets view of the network boot lesson](docs/screenshots/packets.webp) |
-| Overview: the animated lab map and the chapters | Packets view: network boot as a capture tool shows it |
+| ![A lesson: powering on a server over IPMI, step by step](docs/screenshots/lesson.webp) | ![Packets view of the network boot lesson](docs/screenshots/packets.webp) |
+| A lesson: IPMI power-on, packet by packet | Packets view: network boot as a capture tool shows it |
 | ![Rack Shift: building the rack, two rules not met](docs/screenshots/rackshift-build.webp) | ![Rack Shift: a slow drive found in the burn-in results](docs/screenshots/rackshift-burnin.webp) |
 | Rack Shift, Build: the placement rules say what is wrong | Rack Shift, Burn-in: one drive 31% under the median |
 | ![Dark theme: the GPU server lesson](docs/screenshots/dark.webp) | ![Rack Lab: a 24U rack checked against the integration rules](docs/screenshots/racklab.webp) |
 | Dark theme: GPU servers, what changes | Rack Lab: free rack building with power checks |
 
-## Run it
+## The lab behind it
+
+Every lesson has a counterpart in [rackbench-lab](https://github.com/adam-bouafia/rackbench-lab): three Ubuntu nodes on KVM that report like two-socket servers, emulated BMCs that answer IPMI and Redfish, OpenBMC firmware in QEMU, iPXE network boot, a rack-wide BIOS update drill and a fault injector with 11 faults. Rackbench shows how it works; the lab is where you do it.
+
+The traces are illustrative and the numbers simulated. Not affiliated with any hardware vendor.
+
+## Run it locally
 
 Node.js 24.
 
@@ -54,7 +60,7 @@ Their keys live in `.env.local` or in the Vercel project settings, never in git 
 
 ## Keeping it in step with the lab
 
-The fault-hunt simulator (`src/hunt/sim.ts`) mirrors the faults of `lab/faults.sh` in the rackbench repository, and the lessons quote its commands and file names. When a fault or a script changes there, update the simulator and the lessons here.
+The fault-hunt simulator (`src/hunt/sim.ts`) and the faults of Rack Shift (`src/game/shift.ts`) mirror `lab/faults.sh` in [rackbench-lab](https://github.com/adam-bouafia/rackbench-lab), and the lessons quote its commands and file names. When a fault or a script changes there, update the simulator and the lessons here.
 
 ## Layout
 
@@ -72,4 +78,4 @@ scripts/        the narration script
 
 ## License
 
-MIT, see `LICENSE`.
+MIT, see `LICENSE`. Font: JetBrains Mono (SIL Open Font License, `public/fonts/OFL.txt`).

@@ -71,7 +71,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
       <section className="panel ov-hero">
         <p className="eyebrow">{SITE.name} · overview</p>
         <h1>{SITE.tagline}</h1>
-        <p className="lead">How a server rack is tested before it ships, one animated lesson at a time, each with a real lab you can run on a laptop.</p>
+        <p className="lead">Build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, report and ship. 25 lessons, a game, and a real lab behind it all.</p>
         <div className="hero-actions">
           <a className="btn btn-primary" href={`#/lesson/${next.id}`} onClick={link(`#/lesson/${next.id}`)}>
             {count ? 'Continue the course' : 'Start the course'} →
