@@ -54,7 +54,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
           <a className="btn btn-primary" href="#/lesson/rack-tour" onClick={link('#/lesson/rack-tour')}>
             Start with the rack
           </a>
-          <a className="btn" href="#/hunt" onClick={link('#/hunt')}>
+          <a className="btn" href="#/practice" onClick={link('#/practice')}>
             Play the fault hunt
           </a>
           <a className="btn" href="#/labs" onClick={link('#/labs')}>
@@ -91,7 +91,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
       <section className="chapter">
         <h2>Practice</h2>
         <div className="tiles">
-          <a className={`tile${done.includes('fault-hunt') ? ' is-done' : ''}`} href="#/hunt" onClick={link('#/hunt')}>
+          <a className={`tile${done.includes('fault-hunt') ? ' is-done' : ''}`} href="#/practice" onClick={link('#/practice')}>
             <span className="tile-kind">Game</span>
             <strong>Fault hunt</strong>
             <span>One hidden fault, a terminal, the clock. Find the node and name the fault.</span>

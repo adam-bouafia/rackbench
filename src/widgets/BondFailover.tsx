@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, CodeBlock, KeyPoints, LessonHeader, TryIt } from '../engine/ui'
+import { Card, CodeBlock, KeyPoints } from '../engine/ui'
 import { markDone } from '../progress'
 
 type Slave = 'be0' | 'be1'
@@ -115,7 +115,6 @@ export function BondFailover({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
       <div className="toolbar">
         <button className="btn btn-primary" onClick={() => setLink('be0', !sim.link.be0)}>
           {sim.link.be0 ? 'Pull the be0 cable' : 'Plug be0 back in'}
@@ -203,14 +202,6 @@ export function BondFailover({ meta }: { meta: LessonMeta }) {
             'Currently Active Slave and Link Failure Count are the two lines to read first.',
             'Lost packets ≈ the time until the next MII check, divided by the packet interval.',
             'A failure count that moved during a test run is a finding, even if nothing failed.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: 'ssh rk-n1 cat /proc/net/bonding/bond0' },
-            { cmd: 'virsh domif-setlink rk-n1 52:54:00:70:01:11 down', note: 'pull be0 on the real lab, with a ping running' },
-            { cmd: 'virsh domif-setlink rk-n1 52:54:00:70:01:11 up' },
           ]}
         />
       </div>

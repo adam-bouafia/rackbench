@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, CodeBlock, KeyPoints, LessonHeader, TryIt, Verdict } from '../engine/ui'
+import { Card, CodeBlock, KeyPoints, Verdict } from '../engine/ui'
 import { markDone } from '../progress'
 
 type FaultId = 'dimm' | 'bios' | 'disk' | 'swap' | 'mtu'
@@ -84,7 +84,6 @@ export function BomCheck({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
       <Card title="Break something">
         <p className="muted">Each switch puts one real-world mistake into the rack. The table is what the kit compares after collecting the inventory of every node.</p>
         <div className="toggles">
@@ -148,15 +147,6 @@ export function BomCheck({ meta }: { meta: LessonMeta }) {
             'Check serials against the asset list per rack unit, not only the parts.',
             'The board and the OS can disagree about memory: compare dmidecode with MemTotal.',
             'Firmware versions are part of the BOM.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: "onall 'sudo dmidecode -s system-serial-number; sudo dmidecode -s bios-version'" },
-            { cmd: "onall 'grep MemTotal /proc/meminfo; lsblk -o NAME,SIZE,SERIAL'" },
-            { cmd: 'cat lab/bom.yaml', note: 'the golden configuration and the asset list' },
-            { cmd: './lab/faults.sh inject data-disk-missing rk-n1' },
           ]}
         />
       </div>

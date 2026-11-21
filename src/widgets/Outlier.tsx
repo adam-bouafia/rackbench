@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, KeyPoints, LessonHeader, TryIt, Verdict } from '../engine/ui'
+import { Card, KeyPoints, Verdict } from '../engine/ui'
 import { markDone } from '../progress'
 
 type Metric = 'fio' | 'stress' | 'iperf'
@@ -48,7 +48,6 @@ export function Outlier({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
       <div className="toolbar">
         <div className="seg">
           {(Object.keys(METRICS) as Metric[]).map((k) => (
@@ -147,15 +146,6 @@ export function Outlier({ meta }: { meta: LessonMeta }) {
             'A node above the minimum can still fail: identical hardware must give near-identical numbers.',
             'The median of the rack is robust: one bad node cannot drag it down.',
             'Burn-in runs for hours because early failures appear under sustained heat and load.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: 'sudo fio /tmp/rack.fio --output-format=json > /tmp/fio.json', note: 'inside each node, on /dev/vdb only' },
-            { cmd: 'stress-ng --cpu 2 --cpu-method matrixprod --timeout 60s --metrics-brief' },
-            { cmd: './lab/faults.sh inject slow-data-disk rk-n2', note: 'then rerun fio on all three' },
-            { cmd: './lab/faults.sh inject cpu-throttle rk-n3', note: 'then rerun stress-ng' },
           ]}
         />
       </div>

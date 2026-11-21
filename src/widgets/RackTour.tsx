@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, KeyPoints, LessonHeader, TryIt } from '../engine/ui'
+import { Card, KeyPoints } from '../engine/ui'
 import { markDone } from '../progress'
 
 type Side = 'front' | 'back'
@@ -112,7 +112,6 @@ export function RackTour({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
       <div className="toolbar">
         <div className="seg">
           <button className={side === 'front' ? 'on' : ''} onClick={() => setSide('front')}>
@@ -305,14 +304,6 @@ export function RackTour({ meta }: { meta: LessonMeta }) {
             'Two PSUs per server, one on each PDU and feed.',
             'Out-of-band (BMC) and in-band (operating system) management are separate networks.',
             'The cabling table is the contract: labels, LLDP and the test results are checked against it.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: 'source lab/env.sh && virsh net-list', note: 'the two rack networks' },
-            { cmd: 'for n in rk-n1 rk-n2 rk-n3; do virsh domiflist $n; done', note: 'every "cable", with its MAC' },
-            { cmd: "onall 'ip -br link'", note: 'mgmt0, be0 and be1 on every node' },
           ]}
         />
       </div>

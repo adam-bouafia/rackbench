@@ -776,10 +776,10 @@ const biosUpdate: Flow = {
     'Vendor tools such as Supermicro Update Manager (SUM) read and flash firmware out of band, through each BMC. On rackbench, lab/fw.sh plays that tool.',
   ],
   actors: [
-    { id: 'eng', label: 'Engineer', sub: 'update tool', x: 140, y: 220, kind: 'person' },
-    { id: 'b1', label: 'rk-n1', sub: 'BMC 10.10.0.11', x: 600, y: 90, kind: 'server' },
-    { id: 'b2', label: 'rk-n2', sub: 'BMC 10.10.0.12', x: 600, y: 220, kind: 'server' },
-    { id: 'b3', label: 'rk-n3', sub: 'BMC 10.10.0.13', x: 600, y: 350, kind: 'server' },
+    { id: 'eng', label: 'Engineer', sub: 'update tool', x: 110, y: 330, kind: 'person' },
+    { id: 'b1', label: 'rk-n1', sub: 'BMC 10.10.0.11', x: 430, y: 90, kind: 'server' },
+    { id: 'b2', label: 'rk-n2', sub: 'BMC 10.10.0.12', x: 720, y: 250, kind: 'server' },
+    { id: 'b3', label: 'rk-n3', sub: 'BMC 10.10.0.13', x: 1010, y: 410, kind: 'server' },
   ],
   links: [
     ['eng', 'b1'],

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, CodeBlock, KeyPoints, LessonHeader, TryIt, Verdict } from '../engine/ui'
+import { Card, CodeBlock, KeyPoints, Verdict } from '../engine/ui'
 import { markDone } from '../progress'
 
 const CHANNELS = ['A', 'B', 'C', 'D']
@@ -89,7 +89,6 @@ export function ServerAnatomy({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
       <div className="toolbar">
         <span className="muted">Presets:</span>
         <div className="seg">
@@ -222,15 +221,6 @@ export function ServerAnatomy({ meta }: { meta: LessonMeta }) {
             'Fill slot 1 of every channel first, the same DIMMs on both CPUs.',
             'Every empty channel costs bandwidth; uneven channels cost consistency.',
             'LnkCap is what a device can do, LnkSta what it trained at.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: "ssh rk-n1 'lscpu; numactl --hardware'", note: '2 sockets, 2 NUMA nodes' },
-            { cmd: 'ssh rk-n1 sudo dmidecode -t memory', note: 'one block per memory device' },
-            { cmd: "ssh rk-n1 \"sudo lspci -vv | grep -E '^[0-9a-f]|LnkCap:|LnkSta:'\"" },
-            { cmd: './lab/faults.sh inject memory-missing rk-n2', note: 'the OS sees less than the board reports' },
           ]}
         />
       </div>

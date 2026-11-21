@@ -25,6 +25,8 @@ export interface Badge {
   tone?: Tone
 }
 
+export type StepTag = 'message' | 'action' | 'event' | 'result' | 'technique'
+
 export interface Step {
   from: string
   to: string
@@ -38,9 +40,27 @@ export interface Step {
   rawLabel?: string
   /** State shown under actors from this step on (later steps override). */
   state?: Record<string, Badge>
+  /** Short label for the stepper (filled in from lessons/extras.ts). */
+  short?: string
+  tag?: StepTag
+  /** One sentence worth remembering, shown as "Key idea". */
+  key?: string
+  /** Metric values that change at this step. */
+  m?: Record<string, string>
+}
+
+export interface Metric {
+  id: string
+  label: string
+  /** Value before the first step. */
+  start?: string
 }
 
 export interface Flow {
+  /** Metrics shown above the diagram, updated by the steps. */
+  metrics?: Metric[]
+  /** Step (1-based) at which each actor appears; actors not listed are there from the start. */
+  appear?: Record<string, number>
   actors: Actor[]
   links: [string, string][]
   steps: Step[]
@@ -60,6 +80,12 @@ export interface LessonMeta {
   keywords: string[]
   /** The hands-on lab on rackbench that goes with this lesson. */
   lab?: string
+  minutes: number
+  level: 'Beginner' | 'Intermediate'
+  /** "You'll learn" checklist. */
+  learn: string[]
+  /** Commands for widget lessons (flows carry their own). */
+  tryIt?: { cmd: string; note?: string }[]
 }
 
 export const PROTO_KEY: Record<Proto, string> = {

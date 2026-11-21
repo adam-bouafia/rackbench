@@ -13,7 +13,10 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { FLOWS } from '../src/lessons/flows.ts'
+import { FLOWS as BASE } from '../src/lessons/flows.ts'
+import { FLOWS2 } from '../src/lessons/flows2.ts'
+
+const FLOWS = { ...BASE, ...FLOWS2 }
 
 const here = dirname(fileURLToPath(import.meta.url))
 const site = join(here, '..')

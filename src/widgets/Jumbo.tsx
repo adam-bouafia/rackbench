@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import type { LessonMeta } from '../engine/types'
-import { Card, CodeBlock, KeyPoints, LessonHeader, TryIt, Verdict } from '../engine/ui'
+import { Card, CodeBlock, KeyPoints, Verdict } from '../engine/ui'
 import { markDone } from '../progress'
 
 type Mtu = 1500 | 9000
@@ -57,7 +57,6 @@ export function Jumbo({ meta }: { meta: LessonMeta }) {
 
   return (
     <div className="lesson">
-      <LessonHeader meta={meta} />
 
       <Card title="One path: rk-n1 → switch → rk-n3">
         <div className="mtu-path">
@@ -141,14 +140,6 @@ export function Jumbo({ meta }: { meta: LessonMeta }) {
             '-M do forbids fragmentation, so a too-small hop shows instead of being hidden.',
             'Too big for the sender: an immediate error. Too big further on: silence and packet loss.',
             'Test every pair: one wrong port shows as one red row and column.',
-          ]}
-        />
-        <TryIt
-          lab={meta.lab}
-          items={[
-            { cmd: 'ssh rk-n1 ping -M do -s 8972 -c 3 10.70.0.12', note: 'passes after Lab 5' },
-            { cmd: 'ssh rk-n1 ping -M do -s 8973 -c 3 10.70.0.12', note: 'one byte too big' },
-            { cmd: './lab/faults.sh inject mtu-mismatch rk-n3', note: 'then run the matrix' },
           ]}
         />
       </div>
