@@ -2,6 +2,8 @@
 
 An interactive site about how server racks are tested before they ship: BMCs, IPMI and Redfish, network boot, firmware updates, burn-in, network tests and fault finding. Live at https://rackbench.vercel.app
 
+![A lesson: powering on a server over IPMI, step by step](docs/screenshots/lesson.webp)
+
 One screen, four sections:
 
 - Learn: a course of 25 lessons in seven coloured chapters (Foundations, Server architecture, the BMC, Boot and firmware, Rack networking, Testing a rack, Deep dives), with progress kept in the browser. Step-through lessons show devices as isometric blocks that appear when they join the story, the current message as an arrow with a travelling packet, metrics that update per step, a stepper, and a side panel with the explanation, a key idea, what changed, the decoded fields and "You'll learn". New in the deep dives: disks and RAID, heat and power, LLDP cabling checks, writing a test script, Windows and PowerShell on the test bench, BIOS and OS tuning. Interactive lessons: the five kinds of tests, a rack tour with the cabling table, DIMM population and NUMA, PCIe link width, a BOM check, the burn-in outlier rule, jumbo frames, bond failover.
@@ -16,6 +18,17 @@ Each step-through lesson has three views: the isometric diagram (the route draws
 Every lesson has a hands-on counterpart in the lab: https://github.com/adam-bouafia/rackbench, a three-node rack on KVM with emulated BMCs, OpenBMC in QEMU, network boot and a fault injector.
 
 The traces are illustrative and the numbers simulated. Not affiliated with any hardware vendor.
+
+## Screenshots
+
+| | |
+|---|---|
+| ![Overview: the lab map and the seven chapters](docs/screenshots/overview.webp) | ![Packets view of the network boot lesson](docs/screenshots/packets.webp) |
+| Overview: the animated lab map and the chapters | Packets view: network boot as a capture tool shows it |
+| ![Rack Shift: building the rack, two rules not met](docs/screenshots/rackshift-build.webp) | ![Rack Shift: a slow drive found in the burn-in results](docs/screenshots/rackshift-burnin.webp) |
+| Rack Shift, Build: the placement rules say what is wrong | Rack Shift, Burn-in: one drive 31% under the median |
+| ![Dark theme: the GPU server lesson](docs/screenshots/dark.webp) | ![Rack Lab: a 24U rack checked against the integration rules](docs/screenshots/racklab.webp) |
+| Dark theme: GPU servers, what changes | Rack Lab: free rack building with power checks |
 
 ## Run it
 
