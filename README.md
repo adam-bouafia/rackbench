@@ -4,12 +4,14 @@ An interactive site about how server racks are tested before they ship: BMCs, IP
 
 One screen, four sections:
 
-- Learn: a course of 19 lessons in seven coloured chapters (Foundations, Server architecture, the BMC, Boot and firmware, Rack networking, Testing a rack, Deep dives), with progress kept in the browser. Step-through lessons show devices as isometric blocks that appear when they join the story, the current message as an arrow with a travelling packet, metrics that update per step, a stepper, and a side panel with the explanation, a key idea, what changed, the decoded fields and "You'll learn". Interactive lessons: a rack tour with the cabling table, DIMM population and NUMA, PCIe link width, a BOM check, the burn-in outlier rule, jumbo frames, bond failover.
+- Learn: a course of 25 lessons in seven coloured chapters (Foundations, Server architecture, the BMC, Boot and firmware, Rack networking, Testing a rack, Deep dives), with progress kept in the browser. Step-through lessons show devices as isometric blocks that appear when they join the story, the current message as an arrow with a travelling packet, metrics that update per step, a stepper, and a side panel with the explanation, a key idea, what changed, the decoded fields and "You'll learn". New in the deep dives: disks and RAID, heat and power, LLDP cabling checks, writing a test script, Windows and PowerShell on the test bench, BIOS and OS tuning. Interactive lessons: the five kinds of tests, a rack tour with the cabling table, DIMM population and NUMA, PCIe link width, a BOM check, the burn-in outlier rule, jumbo frames, bond failover.
 - Practice: a fault-hunt game (a simulated rack with one hidden fault and a terminal) and a 15-question quiz.
 - Rack Lab: build a 24U rack and check it against integration rules: redundant feeds, the 80% power rule, switches on top, heavy servers low, blanking panels.
-- Cheatsheets: the ipmitool, Redfish, inventory, burn-in, network and boot commands, filterable, one click to copy.
+- Cheatsheets: ipmitool, Redfish, inventory, burn-in, network, boot, drives and power, Windows and PowerShell, cabling, and the rackbench lab commands, filterable, one click to copy.
+- Overview: an animated map of the lab, the chapters with progress, and a table of what is real and what is emulated.
+- Run it yourself: the setup and the 13 labs of the rackbench repository, one at a time.
 
-Each step-through lesson has three views: the isometric diagram (the route draws itself, then a packet loops along it; Replay restarts the step, Pause freezes it), a sequence diagram, and a packet list in the style of a capture tool. The site opens straight into the first lesson and always fits the screen; next to the search are buttons to hide the course, show the diagram only, go full screen and list the keyboard shortcuts. Search (Ctrl K) covers lessons and commands; the interface switches between English, French and Dutch (lesson texts are English); light and dark themes; JetBrains Mono throughout (SIL Open Font License, `public/fonts/OFL.txt`).
+Each step-through lesson has three views: the isometric diagram (the route draws itself, then a packet loops along it; Replay restarts the step, Pause freezes it), a sequence diagram, and a packet list in the style of a capture tool. The site opens straight into the first lesson, and every page fits the screen without scrolling (panels scroll inside); next to the search are buttons to hide the course, show the diagram only, go full screen and list the keyboard shortcuts. Search (Ctrl K) covers lessons and commands; the interface switches between English, French and Dutch (lesson texts are English); light and dark themes; JetBrains Mono throughout (SIL Open Font License, `public/fonts/OFL.txt`).
 
 Every lesson has a hands-on counterpart in the lab: https://github.com/adam-bouafia/rackbench, a three-node rack on KVM with emulated BMCs, OpenBMC in QEMU, network boot and a fault injector.
 
@@ -45,7 +47,7 @@ The fault-hunt simulator (`src/hunt/sim.ts`) mirrors the faults of `lab/faults.s
 
 ```
 src/engine/     lesson layout, isometric diagram (IsoStage), sequence view
-src/lessons/    lesson list, step-through content (flows.ts) and its metrics and labels (extras.ts)
+src/lessons/    lesson list, step-through content (flows.ts, flows2.ts, flows3.ts) and its metrics and labels (extras.ts)
 src/widgets/    the interactive lessons
 src/hunt/       the fault-hunt simulator and its terminal
 src/pages/      overview, practice and quiz, Rack Lab, cheatsheets, lab guide

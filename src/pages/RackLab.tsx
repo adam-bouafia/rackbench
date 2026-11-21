@@ -117,22 +117,24 @@ export function RackLab() {
   const meter = (w: number) => Math.min(100, (w / PDU_W) * 100)
 
   return (
-    <div className="racklab">
-      <header className="page-head">
-        <p className="eyebrow">Rack Lab</p>
-        <h1>Build a rack that would pass integration</h1>
-        <p className="lead">A 24U rack, two power feeds, and the rules a rack team checks before power-on. Click an empty unit, then a device; click a device to move it, remove it or change its power feeds.</p>
-      </header>
-      <div className="toolbar">
-        {Object.keys(PRESETS).map((p) => (
-          <button key={p} className="btn" onClick={() => { setDevs(PRESETS[p]()); setSelDev(null); setSelU(null) }}>
-            {p}
+    <div className="racklab page-fit">
+      <header className="rl-head">
+        <div>
+          <p className="eyebrow">Rack Lab</p>
+          <h1>Build a rack that would pass integration</h1>
+          <p className="muted small">Click an open unit, then a device. Click a device to move it, remove it or change its power feeds.</p>
+        </div>
+        <div className="rl-presets">
+          {Object.keys(PRESETS).map((p) => (
+            <button key={p} className="btn" onClick={() => { setDevs(PRESETS[p]()); setSelDev(null); setSelU(null) }}>
+              {p}
+            </button>
+          ))}
+          <button className="btn" onClick={fillBlanks}>
+            Fill with blanking panels
           </button>
-        ))}
-        <button className="btn" onClick={fillBlanks}>
-          Fill open units with blanking panels
-        </button>
-      </div>
+        </div>
+      </header>
 
       <div className="racklab-grid">
         <div className="rl-rack" role="list" aria-label="Rack units, top to bottom">
@@ -142,7 +144,7 @@ export function RackLab() {
             const size = d ? KINDS[d.kind].size : 1
             const bad = d && (singleFeed.includes(d) || lowSwitch.includes(d) || highHeavy.includes(d))
             return (
-              <div key={u} role="listitem" className="rl-row" style={{ height: size * 26 }}>
+              <div key={u} role="listitem" className="rl-row" style={{ flex: `${size} 1 0` }}>
                 <span className="rl-u">{d ? `${d.u}${size > 1 ? `-${d.u + size - 1}` : ''}` : u}</span>
                 {d ? (
                   <button className={`rl-dev kind-${d.kind}${selDev === d.id ? ' is-sel' : ''}${bad ? ' is-bad' : ''}`} onClick={() => { setSelDev(d.id); setSelU(null) }}>
@@ -228,7 +230,9 @@ export function RackLab() {
             <p className="muted small">Each feed: 230 V × 32 A = {PDU_W} W; design limit 80%. Redundant PSUs share the load, so normally each feed carries about half.</p>
           </section>
 
-          <section className="card">
+        </div>
+        <div className="rl-checks">
+          <section className="card rl-checks-card">
             <h2 className="card-title">
               Checks: {passed} of {checks.length} {allOk && <Verdict ok>Rack passes</Verdict>}
             </h2>

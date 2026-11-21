@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react'
 import { FAULTS, HELP, newGame, run, type FaultId, type Game } from './sim'
-import { Card, KeyPoints, TryIt, Verdict } from '../engine/ui'
+import { Verdict } from '../engine/ui'
 import { markDone } from '../progress'
 
 interface Line {
@@ -121,23 +121,22 @@ export function FaultHunt() {
   const elapsed = (result ? result.ms : now - game.started) || 0
 
   return (
-    <div className="lesson">
-      <header className="lesson-head">
-        <div className="eyebrow">Practice</div>
-        <h1>Fault hunt</h1>
-        <p className="lead">A rack with one hidden fault, the tools a rack engineer has, and a clock. The outputs follow what the real lab prints for each fault that lab/faults.sh can inject.</p>
-      </header>
-
-      <div className="toolbar">
-        <button className="btn btn-primary" onClick={start}>
-          New round
-        </button>
-        <span className="stepcount">Time {mmss(elapsed)}</span>
-        <span className="stepcount">Commands {history.length}</span>
-        {best !== null && <span className="stepcount">Best {mmss(best)}</span>}
-      </div>
-
-      <div className="hunt-grid">
+    <div className="hunt page-fit">
+      <section className="hunt-main">
+        <header className="hunt-head">
+          <div>
+            <h1>Fault hunt</h1>
+            <p className="muted small">One hidden fault in rack rk-01. Triage: reachable? matches the BOM? links, MTU, bond, counters? slower than the others? BMCs?</p>
+          </div>
+          <div className="hunt-stats">
+            <span className="stepcount">⏱ {mmss(elapsed)}</span>
+            <span className="stepcount">{history.length} cmds</span>
+            {best !== null && <span className="stepcount">best {mmss(best)}</span>}
+            <button className="btn btn-primary" onClick={start}>
+              New round
+            </button>
+          </div>
+        </header>
         <div className="term" onClick={() => inputRef.current?.focus()}>
           <div className="term-out" ref={termRef}>
             {lines.map((l, i) => (
@@ -167,9 +166,11 @@ export function FaultHunt() {
             />
           </div>
         </div>
+      </section>
 
-        <Card title="Commands" className="help-card">
-          <p className="muted">Click one to put it in the prompt, then change the node.</p>
+      <aside className="hunt-side">
+        <section className="panel hunt-help">
+          <h2 className="panel-title">Commands</h2>
           <ul className="help-list">
             {HELP.map((h) => (
               <li key={h.cmd}>
@@ -185,96 +186,60 @@ export function FaultHunt() {
               </li>
             ))}
           </ul>
-        </Card>
-      </div>
-
-      <Card title="Your finding">
-        <div className="answer">
-          <label>
-            Node
-            <select value={guess.node} onChange={(e) => setGuess({ ...guess, node: Number(e.target.value) })} disabled={!!result}>
-              <option value={0}>choose</option>
-              <option value={1}>rk-n1</option>
-              <option value={2}>rk-n2</option>
-              <option value={3}>rk-n3</option>
-            </select>
-          </label>
-          <label>
-            Fault
-            <select value={guess.fault} onChange={(e) => setGuess({ ...guess, fault: e.target.value as FaultId })} disabled={!!result}>
-              <option value="">choose</option>
-              {FAULTS.map((f) => (
-                <option key={f.id} value={f.id}>
-                  {f.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button className="btn btn-primary" onClick={answer} disabled={!guess.node || !guess.fault || !!result}>
-            Submit
-          </button>
-        </div>
-        {result && (
-          <div className="result">
-            <p>
-              <Verdict ok={result.node && result.fault}>{result.node && result.fault ? 'Correct' : 'Not quite'}</Verdict> Node {result.node ? 'right' : 'wrong'}, fault {result.fault ? 'right' : 'wrong'}, in {mmss(result.ms)} with {result.cmds} commands. It was <strong>{info.label}</strong> on <strong>rk-n{game.node}</strong>.
-            </p>
-            <table className="fields">
-              <tbody>
-                <tr>
-                  <th>Node</th>
-                  <td>rk-n{game.node}, serial RL2611-0{10 + game.node}, U{9 + game.node}</td>
-                </tr>
-                <tr>
-                  <th>Test case</th>
-                  <td>{info.testCase}</td>
-                </tr>
-                <tr>
-                  <th>Symptom</th>
-                  <td>{info.symptom}</td>
-                </tr>
-                <tr>
-                  <th>Evidence</th>
-                  <td>{info.evidence}</td>
-                </tr>
-                <tr>
-                  <th>On a real rack</th>
-                  <td>{info.cause}</td>
-                </tr>
-                <tr>
-                  <th>Action</th>
-                  <td>{info.action}</td>
-                </tr>
-              </tbody>
-            </table>
-            <p className="muted">
-              Same fault on the real lab: <code>./lab/faults.sh inject {game.fault} rk-n{game.node}</code>
-            </p>
-            <button className="btn btn-primary" onClick={start}>
-              Next round
-            </button>
-          </div>
-        )}
-      </Card>
-
-      <div className="two-col">
-        <KeyPoints
-          points={[
-            'Triage order: reachable? matches the BOM? links, MTU and bond healthy? any node slower than the others? all BMCs answer?',
-            'Compare nodes with each other: the odd one out is the suspect.',
-            'Write the finding before you look at the answer: node, symptom, evidence, cause, action.',
-            'Quiet faults exist: a link that flaps passes throughput tests, a throttled CPU only shows under load.',
-          ]}
-        />
-        <TryIt
-          items={[
-            { cmd: './lab/faults.sh random', note: 'the same game on the real lab' },
-            { cmd: './lab/faults.sh reveal' },
-            { cmd: './lab/faults.sh clear' },
-          ]}
-          lab="Lab 8"
-        />
-      </div>
+        </section>
+        <section className="panel hunt-answer">
+          <h2 className="panel-title">Your finding</h2>
+          {!result ? (
+            <div className="answer">
+              <label>
+                Node
+                <select value={guess.node} onChange={(e) => setGuess({ ...guess, node: Number(e.target.value) })}>
+                  <option value={0}>choose</option>
+                  <option value={1}>rk-n1</option>
+                  <option value={2}>rk-n2</option>
+                  <option value={3}>rk-n3</option>
+                </select>
+              </label>
+              <label>
+                Fault
+                <select value={guess.fault} onChange={(e) => setGuess({ ...guess, fault: e.target.value as FaultId })}>
+                  <option value="">choose</option>
+                  {FAULTS.map((f) => (
+                    <option key={f.id} value={f.id}>
+                      {f.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button className="btn btn-primary" onClick={answer} disabled={!guess.node || !guess.fault}>
+                Submit
+              </button>
+            </div>
+          ) : (
+            <div className="result">
+              <p>
+                <Verdict ok={result.node && result.fault}>{result.node && result.fault ? 'Correct' : 'Not quite'}</Verdict> {mmss(result.ms)}, {result.cmds} commands. It was <strong>{info.label}</strong> on <strong>rk-n{game.node}</strong>.
+              </p>
+              <dl className="kv">
+                <dt>Test case</dt>
+                <dd>{info.testCase}</dd>
+                <dt>Evidence</dt>
+                <dd>{info.evidence}</dd>
+                <dt>Real rack</dt>
+                <dd>{info.cause}</dd>
+                <dt>Action</dt>
+                <dd>{info.action}</dd>
+              </dl>
+              <p className="muted small">
+                On the lab: <code>./lab/faults.sh inject {game.fault} rk-n{game.node}</code>
+              </p>
+              <button className="btn btn-primary" onClick={start}>
+                Next round
+              </button>
+            </div>
+          )}
+        </section>
+      </aside>
     </div>
   )
 }

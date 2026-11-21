@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { CodeBlock } from '../engine/ui'
 import { lessonById } from '../lessons/index'
 import { SITE, labFile } from '../site'
@@ -164,54 +165,74 @@ sudo smartctl -a /dev/nvme0n1; sensors`,
 ]
 
 export function Labs({ go }: { go: (hash: string) => void }) {
+  const [sel, setSel] = useState<string>('setup')
+  const lab = LABS.find((l) => l.id === sel)
+  const scripts = ['provision-rack.sh', 'bmc.sh', 'obmc.sh', 'fw.sh', 'pxe.sh', 'faults.sh', 'snapshot-rack.sh', 'teardown-rack.sh', 'env.sh', 'bom.yaml']
   return (
-    <div className="lesson">
-      <header className="lesson-head">
-        <div className="eyebrow">Hands on</div>
+    <div className="labs-fit page-fit">
+      <aside className="panel labs-list">
+        <p className="eyebrow">Hands on</p>
         <h1>Run it yourself</h1>
-        <p className="lead">The lessons on this site have a real counterpart: a three-node rack on KVM with emulated BMCs, a real BMC firmware, network boot and a fault injector, all from the scripts in the rackbench repository.</p>
-      </header>
-
-      <CodeBlock code={SETUP} label="Set up the rack" />
-      <p className="muted">
-        Scripts:{' '}
-        {['provision-rack.sh', 'bmc.sh', 'obmc.sh', 'fw.sh', 'pxe.sh', 'faults.sh', 'snapshot-rack.sh', 'teardown-rack.sh', 'env.sh', 'bom.yaml'].map((f, i) => (
-          <span key={f}>
-            {i > 0 && ' · '}
-            <a href={labFile(f)} target="_blank" rel="noreferrer">
-              {f}
-            </a>
-          </span>
-        ))}
-      </p>
-
-      <div className="labs">
-        {LABS.map((l) => (
-          <section key={l.id} className="card lab" id={`lab-${l.id}`}>
-            <h2 className="card-title">
-              Lab {l.id}: {l.title}
-            </h2>
-            <p>{l.goal}</p>
-            <CodeBlock code={l.code} label="Commands" />
+        <p className="muted small">Every lesson has a real counterpart on a three-node rack on KVM.</p>
+        <ul>
+          <li>
+            <button className={sel === 'setup' ? 'on' : ''} onClick={() => setSel('setup')}>
+              <span className="lab-n">▸</span> Set up the rack
+            </button>
+          </li>
+          {LABS.map((l) => (
+            <li key={l.id}>
+              <button className={sel === l.id ? 'on' : ''} onClick={() => setSel(l.id)}>
+                <span className="lab-n">{l.id}</span> {l.title}
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
+      <section className="panel labs-detail">
+        {!lab ? (
+          <>
+            <h2>Set up the rack</h2>
+            <p>Fedora or any Linux with KVM and libvirt, about 7.5 GB of free memory, Node.js only for this site. The scripts live in the rackbench repository.</p>
+            <CodeBlock code={SETUP} label="Set up" />
+            <h3 className="panel-sub">Scripts</h3>
+            <div className="lab-scripts">
+              {scripts.map((f) => (
+                <a key={f} href={labFile(f)} target="_blank" rel="noreferrer" className="chip">
+                  {f}
+                </a>
+              ))}
+            </div>
+          </>
+        ) : (
+          <>
+            <p className="eyebrow">Lab {lab.id}</p>
+            <h2>{lab.title}</h2>
+            <p>{lab.goal}</p>
+            <CodeBlock code={lab.code} label="Commands" />
             <p>
-              <strong>Done when:</strong> {l.done}
+              <strong>Done when:</strong> {lab.done}
             </p>
-            {l.lessons && (
-              <p className="muted">
-                Lessons:{' '}
-                {l.lessons.map((id, i) => (
-                  <span key={id}>
-                    {i > 0 && ' · '}
-                    <a href={`#/lesson/${id}`} onClick={(e) => { e.preventDefault(); go(`#/lesson/${id}`) }}>
-                      {lessonById(id)?.title}
-                    </a>
-                  </span>
+            {lab.lessons && (
+              <div className="lab-scripts">
+                {lab.lessons.map((id) => (
+                  <a
+                    key={id}
+                    href={`#/lesson/${id}`}
+                    className="chip chip-lab"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      go(`#/lesson/${id}`)
+                    }}
+                  >
+                    Lesson: {lessonById(id)?.title}
+                  </a>
                 ))}
-              </p>
+              </div>
             )}
-          </section>
-        ))}
-      </div>
+          </>
+        )}
+      </section>
     </div>
   )
 }

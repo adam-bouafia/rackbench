@@ -111,6 +111,51 @@ export const SHEETS: Sheet[] = [
     ],
   },
   {
+    id: 'storage-power',
+    title: 'Drives, heat and power',
+    color: 'var(--c-arch)',
+    entries: [
+      { cmd: 'sudo nvme list', what: 'NVMe drives: model, serial, firmware.' },
+      { cmd: 'sudo nvme smart-log /dev/nvme0', what: 'NVMe health: media errors, percentage used, temperature.' },
+      { cmd: "lsblk -d -o NAME,SIZE,MODEL,SERIAL,REV", what: 'Every disk with its serial and firmware revision.' },
+      { cmd: `${IPMI} sdr type Temperature`, what: 'Temperature sensors and their state.' },
+      { cmd: `${IPMI} sdr type Fan`, what: 'Fan speeds.' },
+      { cmd: `${IPMI} dcmi power reading`, what: 'Input power, on BMCs that support DCMI.' },
+      { cmd: 'cpupower frequency-info --policy', what: 'CPU frequency governor and limits.' },
+      { cmd: 'tuned-adm active', what: 'The active tuned profile.' },
+      { cmd: 'cat /sys/class/net/<nic>/device/numa_node', what: 'Which NUMA node a NIC belongs to.' },
+      { cmd: 'numactl --cpunodebind=0 --membind=0 <cmd>', what: 'Run a benchmark on one socket and its memory.' },
+    ],
+  },
+  {
+    id: 'windows',
+    title: 'Windows and PowerShell',
+    color: 'var(--c-deep)',
+    entries: [
+      { cmd: 'Get-CimInstance Win32_Processor | Select-Object Name, NumberOfCores', what: 'CPUs.' },
+      { cmd: 'Get-CimInstance Win32_PhysicalMemory | Select-Object DeviceLocator, Capacity, Speed', what: 'Memory per slot.' },
+      { cmd: 'Get-PhysicalDisk | Select-Object FriendlyName, SerialNumber, Size, HealthStatus', what: 'Disks and their health.' },
+      { cmd: 'Get-NetAdapter | Select-Object Name, MacAddress, LinkSpeed, Status', what: 'Network adapters and link speed.' },
+      { cmd: "Get-WinEvent -FilterHashtable @{ LogName = 'System'; Level = 2; StartTime = $start }", what: 'System log errors since the run started.' },
+      { cmd: 'pnputil /enum-drivers', what: 'Installed drivers.' },
+      { cmd: 'diskspd.exe -c1G -d60 -r -w0 -t4 -o32 -b4K -Sh -L D:\\test.dat', what: 'Random 4K read benchmark, caching off.' },
+      { cmd: '<objects> | ConvertTo-Json', what: 'Results as JSON for the report.' },
+    ],
+  },
+  {
+    id: 'cabling',
+    title: 'Cabling and scripts',
+    color: 'var(--c-net)',
+    entries: [
+      { cmd: 'sudo lldpctl', what: 'The switch and port each server port reaches.' },
+      { cmd: 'sudo lldpctl -f json', what: 'The same, as JSON, for comparison with the cabling table.' },
+      { cmd: 'set -euo pipefail', what: 'First line of every test script: stop on errors.' },
+      { cmd: 'timeout 300 ssh -o BatchMode=yes -o ConnectTimeout=5 <node> <cmd>', what: 'A remote call that cannot hang the test.' },
+      { cmd: "printf '%s\\n' <nodes> | xargs -P 32 -I{} timeout 2h ssh {} <suite>", what: 'Run a suite on many nodes in parallel.' },
+      { cmd: 'shellcheck <script>.sh', what: 'Lint every test script.' },
+    ],
+  },
+  {
     id: 'lab',
     title: 'rackbench lab',
     color: 'var(--c-practice)',
@@ -130,6 +175,7 @@ export const SHEETS: Sheet[] = [
 
 export function Cheatsheets() {
   const [q, setQ] = useState('')
+  const [sel, setSel] = useState(SHEETS[0].id)
   const [copied, setCopied] = useState('')
   const words = q.toLowerCase().split(/\s+/).filter(Boolean)
   const match = (e: Entry) => words.every((w) => `${e.cmd} ${e.what}`.toLowerCase().includes(w))
@@ -142,40 +188,47 @@ export function Cheatsheets() {
       /* blocked */
     }
   }
+  const shown = words.length ? SHEETS.map((s) => ({ ...s, entries: s.entries.filter(match) })).filter((s) => s.entries.length) : SHEETS.filter((s) => s.id === sel)
   return (
-    <div className="sheets">
-      <header className="page-head">
+    <div className="sheets-fit page-fit">
+      <aside className="panel sheets-nav">
         <p className="eyebrow">Cheatsheets</p>
-        <h1>The commands a rack engineer types every day</h1>
-        <div className="sheet-search">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter: sel, mtu, bios, fio…" aria-label="Filter commands" />
-        </div>
-      </header>
-      <div className="sheet-grid">
-        {SHEETS.map((s) => {
-          const list = s.entries.filter(match)
-          if (!list.length) return null
-          return (
-            <section key={s.id} className="card sheet" id={`sheet-${s.id}`}>
-              <h2 className="sheet-title">
+        <h1>Commands</h1>
+        <input className="sheet-filter" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter: sel, mtu, fio…" aria-label="Filter commands" />
+        <ul>
+          {SHEETS.map((s) => (
+            <li key={s.id}>
+              <button className={!words.length && sel === s.id ? 'on' : ''} onClick={() => { setSel(s.id); setQ('') }}>
                 <i style={{ background: s.color }} />
-                {s.title}
-              </h2>
-              <ul>
-                {list.map((e) => (
-                  <li key={e.cmd}>
-                    <button className="sheet-cmd" onClick={() => copy(e.cmd)} title="Copy">
-                      <code>{e.cmd}</code>
-                      <span className="sheet-copy">{copied === e.cmd ? 'copied' : 'copy'}</span>
-                    </button>
-                    <span className="sheet-what">{e.what}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
-          )
-        })}
-      </div>
+                <span>{s.title}</span>
+                <span className="muted">{s.entries.length}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+      </aside>
+      <section className="panel sheets-body">
+        {shown.map((s) => (
+          <div key={s.id} className="sheet">
+            <h2 className="sheet-title">
+              <i style={{ background: s.color }} />
+              {s.title}
+            </h2>
+            <ul>
+              {s.entries.map((e) => (
+                <li key={e.cmd}>
+                  <button className="sheet-cmd" onClick={() => copy(e.cmd)} title="Copy">
+                    <code>{e.cmd}</code>
+                    <span className="sheet-copy">{copied === e.cmd ? 'copied' : 'copy'}</span>
+                  </button>
+                  <span className="sheet-what">{e.what}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+        {!shown.length && <p className="muted">Nothing matches.</p>}
+      </section>
     </div>
   )
 }

@@ -427,6 +427,7 @@ export function App() {
   return (
     <div className={`app${courseHidden === '1' ? ' no-course' : ''}${diagramOnly && route.page === 'lesson' ? ' diagram-only' : ''}`}>
       <header className="topbar">
+        <div className="top-left">
         <button className="btn nav-toggle" onClick={() => setNavOpen(!navOpen)} aria-label={t('course')}>
           ☰
         </button>
@@ -436,6 +437,7 @@ export function App() {
             rack<em>bench</em>
           </span>
         </a>
+        </div>
         <nav className="tabs">
           <a href={firstLesson} onClick={link(route.page === 'lesson' ? hash : firstLesson)} className={tab === 'learn' ? 'on' : ''}>
             <Svg d={ICON.book} size={15} />
@@ -454,6 +456,7 @@ export function App() {
             {t('cheatsheets')}
           </a>
         </nav>
+        <div className="top-right">
         <Search go={go} />
         <div className="tools">
           <button className={`tool-btn${courseHidden === '1' ? '' : ' is-on'}`} onClick={() => setCourseHidden(courseHidden === '1' ? '0' : '1')} title={`${t('hideCourse')} ( [ )`} aria-label={t('hideCourse')}>
@@ -486,6 +489,7 @@ export function App() {
           <span>{t('builtBy')}</span>
           <strong>{SITE.author}</strong>
         </a>
+        </div>
         {keysOpen && (
           <div className="shortcuts" role="dialog" aria-label={t('shortcuts')}>
             <strong>{t('shortcuts')}</strong>
@@ -507,7 +511,7 @@ export function App() {
         <aside className={`course${navOpen ? ' is-open' : ''}`}>
           <CourseNav route={route} link={link} />
         </aside>
-        <main className={`main${full ? ' is-full' : ''}`}>{main}</main>
+        <main className={`main${full ? ' is-page' : ''}`}>{main}</main>
       </div>
       <Assistant />
     </div>
