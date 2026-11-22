@@ -10,6 +10,7 @@ import { Outlier } from './widgets/Outlier'
 import { Jumbo } from './widgets/Jumbo'
 import { BondFailover } from './widgets/BondFailover'
 import { TestTypes } from './widgets/TestTypes'
+import { RaidDrives } from './widgets/RaidDrives'
 import { Home } from './pages/Home'
 import { Labs } from './pages/Labs'
 import { DataCenter } from './explore/DataCenter'
@@ -29,6 +30,7 @@ const WIDGETS: Record<string, ComponentType<{ meta: LessonMeta }>> = {
   jumbo: Jumbo,
   bond: BondFailover,
   'test-types': TestTypes,
+  'raid-drives': RaidDrives,
 }
 
 type Route =
@@ -113,6 +115,7 @@ function Search({ go }: { go: (h: string) => void }) {
       { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
       { hash: '#/practice/quiz', title: 'Quiz', sub: '15 questions from real rack work', kind: 'Practice', hay: 'quiz questions test interview' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
+      { hash: '#/explore/C/C01/node01', title: 'Inside a server', sub: 'Every part of a 1U two-socket server: click it for what it is and how it is checked', kind: 'Explore', hay: 'inside server parts anatomy motherboard cpu socket upi numa dimm rdimm ecc riser pcie nic hba raid m.2 backplane fans sensors psu bmc bios serial fru chassis' },
       { hash: '#/explore', title: 'Data center explorer', sub: 'Zoom from the data hall into a row, a rack and a server', kind: 'Explore', hay: 'data center hall row rack server aisle cooling power ups crah busway explore zoom' },
       { hash: '#/labs', title: 'Run it yourself', sub: 'Labs 0 to 11 on the real rack', kind: 'Lab', hay: 'labs install setup hands on scripts' },
       ...SHEETS.flatMap((s) => s.entries.map((e) => ({ hash: '#/cheatsheets', title: e.cmd, sub: `${s.title}: ${e.what}`, kind: 'Command', hay: `${e.cmd} ${e.what} ${s.title}` }))),

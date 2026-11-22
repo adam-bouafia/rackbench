@@ -381,19 +381,33 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
   return (
     <svg viewBox="0 0 900 500" className="dcx-svg" role="img" aria-label="Top view of a 1U two-socket server with the lid off">
       <Defs />
-      <rect x={70} y={50} width={760} height={400} rx={8} className="dcx-chassis" />
+      {hit('chassis', <rect x={70} y={50} width={760} height={400} rx={8} className="dcx-chassis" />)}
+      {hit('board', <polygon points="240,56 826,56 826,320 672,320 672,444 240,444" className="dcx-board" />)}
       <text x={110} y={38} textAnchor="middle" className="dcx-small">
         front · cold aisle
       </text>
       <text x={790} y={38} textAnchor="middle" className="dcx-small">
         back · hot aisle
       </text>
-      {[150, 250, 350].map((y) => (
+      {[200, 300, 400].map((y) => (
         <Flow key={y} kind="cold" from={[18, y]} to={[64, y]} />
       ))}
       {[180, 300].map((y) => (
         <Flow key={y} kind="hot" from={[840, y]} to={[886, y]} />
       ))}
+      {hit(
+        'front',
+        <>
+          <rect x={50} y={58} width={20} height={96} rx={3} className="dcx-ear" />
+          <circle cx={60} cy={74} r={5} className="dcx-pwr" />
+          <circle cx={60} cy={92} r={4} className="dcx-uid" />
+          <circle cx={60} cy={106} r={2.5} className="dcx-led" />
+          <rect x={30} y={124} width={30} height={22} rx={2} className="dcx-pulltag" />
+          <text x={45} y={138} textAnchor="middle" className="dcx-tiny">
+            S/N
+          </text>
+        </>,
+      )}
       {hit(
         'drives',
         <>
@@ -404,11 +418,17 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
             </g>
           ))}
           <text x={115} y={470} textAnchor="middle" className="dcx-small">
-            NVMe × 8
+            NVMe U.2 × 8
           </text>
         </>,
       )}
-      <line x1={162} x2={162} y1={58} y2={442} className="dcx-backplane" />
+      {hit(
+        'backplane',
+        <>
+          <rect x={155} y={56} width={14} height={388} className="dcx-pad" />
+          <line x1={162} x2={162} y1={58} y2={442} className="dcx-backplane" />
+        </>,
+      )}
       {hit(
         'fans',
         <>
@@ -435,6 +455,16 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
         </>,
       )}
       {hit(
+        'upi',
+        <>
+          <polyline points="426,146 490,146 490,352 426,352" className="dcx-pad-line" />
+          <polyline points="426,146 490,146 490,352 426,352" className="dcx-upi" />
+          <text x={503} y={250} textAnchor="middle" className="dcx-tiny" transform="rotate(90 503 250)">
+            UPI
+          </text>
+        </>,
+      )}
+      {hit(
         'cpus',
         <>
           {[118, 310].map((y, k) => (
@@ -451,6 +481,36 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
         </>,
       )}
       {hit(
+        'sensors',
+        <>
+          {[
+            [178, 64],
+            [316, 153],
+            [316, 345],
+            [664, 354],
+          ].map(([x, y]) => (
+            <g key={`${x}-${y}`}>
+              <circle cx={x} cy={y} r={7} className="dcx-sensor" />
+              <text x={x} y={y + 3} textAnchor="middle" className="dcx-tiny is-fixed">
+                T
+              </text>
+            </g>
+          ))}
+        </>,
+      )}
+      {hit(
+        'riser',
+        <>
+          <rect x={546} y={60} width={12} height={112} rx={2} className="dcx-riser" />
+          <text x={790} y={91} textAnchor="middle" className="dcx-tiny">
+            x16
+          </text>
+          <text x={790} y={148} textAnchor="middle" className="dcx-tiny">
+            x8
+          </text>
+        </>,
+      )}
+      {hit(
         'nic',
         <>
           <rect x={560} y={64} width={210} height={46} rx={3} className="dcx-card" />
@@ -459,6 +519,16 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
           </text>
           <rect x={824} y={70} width={12} height={14} className="dcx-port-rear" />
           <rect x={824} y={90} width={12} height={14} className="dcx-port-rear" />
+        </>,
+      )}
+      {hit(
+        'hba',
+        <>
+          <rect x={560} y={122} width={210} height={46} rx={3} className="dcx-card is-hba" />
+          <text x={665} y={150} textAnchor="middle" className="dcx-label-in">
+            RAID / HBA
+          </text>
+          <rect x={824} y={138} width={12} height={14} className="dcx-port-rear is-hba" />
         </>,
       )}
       {hit(
@@ -482,6 +552,21 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
         </>,
       )}
       {hit(
+        'm2',
+        <>
+          <rect x={520} y={304} width={80} height={22} rx={2} className="dcx-m2" />
+          <text x={560} y={319} textAnchor="middle" className="dcx-label-in">
+            M.2
+          </text>
+          <text x={560} y={342} textAnchor="middle" className="dcx-tiny">
+            boot
+          </text>
+        </>,
+      )}
+      <text x={560} y={430} textAnchor="middle" className="dcx-silk">
+        motherboard X13
+      </text>
+      {hit(
         'psus',
         <>
           {[
@@ -490,7 +575,7 @@ function ServerScene({ on, active }: { on: Handlers; active: string | null }) {
           ].map((p) => (
             <g key={p.y}>
               <rect x={680} y={p.y} width={146} height={52} rx={3} className={`dcx-psu is-${p.c}`} />
-              <text x={753} y={p.y + 30} textAnchor="middle" className="dcx-label-in">
+              <text x={753} y={p.y + 30} textAnchor="middle" className="dcx-label-in is-fixed">
                 {p.t}
               </text>
             </g>
@@ -597,6 +682,7 @@ export function DataCenter({ go, path }: { go: (h: string) => void; path: string
   const title = level === 'hall' ? 'The data hall' : level === 'row' ? `Row ${row}` : level === 'rack' ? `Rack ${rack}` : `${node} in rack ${rack}`
   const sub = level === 'rack' && type ? SPOTS[`rack-${type}`]?.text : null
   const s = spot ? SPOTS[spot] : null
+  const next = spot && info.parts ? info.parts[info.parts.indexOf(spot) + 1] ?? null : null
 
   return (
     <div className="dcx page-fit">
@@ -664,6 +750,18 @@ export function DataCenter({ go, path }: { go: (h: string) => void; path: string
           <div className="dcx-spot">
             <h2>{s.title}</h2>
             <p>{s.text}</p>
+            {s.check && (
+              <p className="dcx-check">
+                <b>How it is checked.</b> {s.check}
+              </p>
+            )}
+            {s.terms && (
+              <div className="dcx-terms" aria-label="Terms">
+                {s.terms.map((t) => (
+                  <span key={t}>{t}</span>
+                ))}
+              </div>
+            )}
             {s.lessons && (
               <>
                 <h3 className="panel-sub">In the lessons</h3>
@@ -679,9 +777,16 @@ export function DataCenter({ go, path }: { go: (h: string) => void; path: string
                 ))}
               </div>
             )}
-            <button className="dcx-back" onClick={() => setSpot(null)}>
-              ← back to {title}
-            </button>
+            <div className="dcx-spotnav">
+              <button className="dcx-back" onClick={() => setSpot(null)}>
+                ← back to {title}
+              </button>
+              {next && (
+                <button className="btn btn-sm" onClick={() => setSpot(next)}>
+                  Next: {SPOTS[next].title} →
+                </button>
+              )}
+            </div>
           </div>
         ) : (
           <>
@@ -704,6 +809,20 @@ export function DataCenter({ go, path }: { go: (h: string) => void; path: string
                 ))}
               </div>
             )}
+          </>
+        )}
+        {info.parts && (
+          <>
+            <h3 className="panel-sub">
+              Every part ({info.parts.length})
+            </h3>
+            <div className="dcx-partlist">
+              {info.parts.map((id) => (
+                <button key={id} className={spot === id ? 'on' : ''} onClick={() => setSpot(id)} onMouseEnter={() => setHover(SPOTS[id].title)} onMouseLeave={() => setHover(null)}>
+                  {SPOTS[id].title}
+                </button>
+              ))}
+            </div>
           </>
         )}
         <p className="dcx-hint">{info.hint} Esc zooms out.</p>

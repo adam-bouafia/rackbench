@@ -72,13 +72,16 @@ export function Home({ go }: { go: (hash: string) => void }) {
       <section className="panel ov-hero">
         <p className="eyebrow">{SITE.name} · overview</p>
         <h1>{SITE.tagline}</h1>
-        <p className="lead">Build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, report and ship. 25 lessons, a game, and a real lab behind it all.</p>
+        <p className="lead">Build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, report and ship. 26 lessons, a game, and a real lab behind it all.</p>
         <div className="hero-actions">
           <a className="btn btn-primary" href={`#/lesson/${next.id}`} onClick={link(`#/lesson/${next.id}`)}>
             {count ? 'Continue the course' : 'Start the course'} →
           </a>
           <a className="btn" href="#/explore" onClick={link('#/explore')}>
             Explore a data center
+          </a>
+          <a className="btn" href="#/explore/C/C01/node01" onClick={link('#/explore/C/C01/node01')}>
+            Inside a server
           </a>
           <a className="btn" href="#/practice" onClick={link('#/practice')}>
             Play Rack Shift
@@ -185,6 +188,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
             {[
               ['#/practice', 'Rack Shift: build, test and ship racks'],
               ['#/practice/build', 'Build a server: parts into a 1U'],
+              ['#/lesson/raid-drives', 'RAID by hand: fail disks, see what survives'],
               ['#/practice/hunt', 'Fault hunt: find the broken node'],
               ['#/practice/quiz', 'Quiz: 15 questions'],
               ['#/lab', 'Rack Lab: build and power a rack'],

@@ -12,6 +12,10 @@ export interface Action {
 export interface Spot {
   title: string
   text: string
+  /** How a rack engineer checks it (server parts). */
+  check?: string
+  /** The words of docs/07 Part 2 this part teaches. */
+  terms?: string[]
   lessons?: string[]
   actions?: Action[]
 }
@@ -68,7 +72,7 @@ const RACK_LAB: Action = { label: 'Build one in Rack Lab', hash: '#/lab' }
 const RACK_SHIFT: Action = { label: 'Play Rack Shift', hash: '#/practice' }
 const BUILD: Action = { label: 'Build a server yourself', hash: '#/practice/build' }
 
-export const LEVELS: Record<Level, { text: string; facts: string[]; lessons: string[]; hint: string; actions?: Action[] }> = {
+export const LEVELS: Record<Level, { text: string; facts: string[]; lessons: string[]; hint: string; actions?: Action[]; parts?: string[] }> = {
   hall: {
     text: 'A room of racks, the power that feeds them and the air that cools them. The racks stand in rows that face each other, so every server takes cold air from the same aisle and blows hot air into the next one.',
     facts: [
@@ -110,9 +114,10 @@ export const LEVELS: Record<Level, { text: string; facts: string[]; lessons: str
       'The BMC runs on standby power, so it answers over the network even when the server is off.',
       'Firmware is part of the build: the BIOS and BMC versions must match the baseline of the order.',
     ],
-    lessons: ['server-anatomy', 'post-boot', 'storage', 'thermal', 'ipmi-power', 'tuning'],
+    lessons: ['server-anatomy', 'raid-drives', 'post-boot', 'storage', 'thermal', 'ipmi-power', 'tuning'],
     hint: 'Click a part for what it does and how it is tested.',
-    actions: [BUILD],
+    actions: [BUILD, { label: 'RAID and drives by hand', hash: '#/lesson/raid-drives' }],
+    parts: ['chassis', 'front', 'drives', 'backplane', 'fans', 'sensors', 'cpus', 'upi', 'dimms', 'board', 'bios', 'bmc', 'm2', 'riser', 'nic', 'hba', 'psus'],
   },
 }
 
@@ -243,45 +248,126 @@ export const SPOTS: Record<string, Spot> = {
     lessons: ['thermal'],
     actions: [RACK_LAB],
   },
-  // server
+  // server: every part of docs Part 2, in the order of the parts list
+  chassis: {
+    title: 'Chassis (1U)',
+    text: 'The metal box around everything: 1U high (44.45 mm), 19 inches wide, on rails in the rack. It holds the board, the fan wall, the drive backplane and the power supplies. The lid is off here.',
+    check: 'Rails fitted, nothing bent, and the chassis model the order names.',
+    terms: ['chassis', '1U', 'rails'],
+    lessons: ['rack-tour'],
+  },
+  front: {
+    title: 'Front panel and serial tag',
+    text: 'On the rack ear: the power button, the UID (unit identify) LED and the status LEDs. A pull-out tag carries the serial number and, on many servers, the BMC MAC address and its own default password.',
+    check: 'The serial on the tag matches the asset list for this rack unit and the serial in the firmware (dmidecode -s system-serial-number, ipmitool fru). In a full rack, turn the UID LED on (ipmitool chassis identify) to find the right server.',
+    terms: ['serial number', 'UUID', 'FRU', 'UID LED', 'asset list'],
+    lessons: ['bom-check', 'ipmi-power'],
+  },
   drives: {
-    title: 'Front drive bays',
-    text: 'Eight hot-swap NVMe drives behind a backplane. A drive that is not seated is not seen at all; a slow one stands out in fio against the same drives in the other servers.',
-    lessons: ['storage', 'outlier'],
+    title: 'Front drive bays: NVMe U.2',
+    text: 'Eight hot-swap 2.5-inch U.2 bays with NVMe SSDs, which talk PCIe straight to the CPUs: the fastest kind of drive. Other servers put SATA or SAS drives here, or long thin E1.S rulers.',
+    check: 'Every drive in the bay the order names, seen by the OS (lsblk, nvme list), healthy (smartctl -a) and as fast as the same drives in the other servers (fio). A drive that is not seated is not seen at all.',
+    terms: ['SSD', 'NVMe', 'U.2', 'E1.S', 'hot-swap', 'SATA', 'SAS'],
+    lessons: ['storage', 'raid-drives', 'outlier'],
+  },
+  backplane: {
+    title: 'Drive backplane',
+    text: 'The board behind the bays that every drive plugs into. It carries power and the data lanes: PCIe to the CPUs for NVMe, or cables to a RAID controller or HBA for SAS and SATA drives.',
+    check: 'A drive missing in one bay: reseat it, then swap it with a drive from a working bay. If the fault stays with the bay, it is the backplane or its cable; if it moves with the drive, it is the drive.',
+    terms: ['backplane', 'hot-swap', 'NVMe', 'SAS', 'SATA'],
+    lessons: ['storage', 'raid-drives'],
   },
   fans: {
     title: 'Fan wall',
-    text: 'Seven fans that the BMC speeds up as temperatures rise. One failed fan shows up as a hot CPU and throttling under load.',
+    text: 'Seven fans pull cold air in at the front and push it across the CPUs and the memory to the back. The BMC sets their speed from the temperature sensors.',
+    check: 'Every fan reports a speed (ipmitool sdr type Fan). One failed fan shows up as a hot CPU and throttling under load.',
+    terms: ['fans', 'airflow', 'SDR', 'throttling'],
     lessons: ['thermal'],
+  },
+  sensors: {
+    title: 'Temperature sensors',
+    text: 'Small sensors at the air inlet, on each CPU, near the memory and in the power supplies. The BMC reads them all the time, speeds the fans up as they warm, and logs an event when one crosses a threshold.',
+    check: 'ipmitool sdr shows every reading with its thresholds. Under burn-in, compare them with the neighbours; a high inlet temperature is the room, not the server.',
+    terms: ['sensor', 'threshold', 'SDR', 'SEL', 'inlet temperature'],
+    lessons: ['thermal', 'sel'],
   },
   cpus: {
     title: 'CPUs (two sockets)',
-    text: 'Two processors linked to each other. Each one owns half of the memory and part of the PCIe lanes.',
+    text: 'Two processors, Intel Xeon or AMD EPYC, each in its socket under a heatsink. Each CPU has many cores, and with hyper-threading each core runs two threads. Each CPU owns half of the memory and part of the PCIe lanes.',
+    check: 'Model, sockets, cores per socket and threads per core match the BOM (lscpu). Under burn-in the temperature stays below the limit and the clock does not drop (turbostat).',
+    terms: ['CPU', 'socket', 'core', 'thread', 'heatsink', 'lscpu'],
+    lessons: ['server-anatomy', 'tuning'],
+    actions: [BUILD],
+  },
+  upi: {
+    title: 'The link between the CPUs (UPI)',
+    text: 'The two sockets talk over a dedicated link: UPI on newer Intel Xeons (QPI before it), Infinity Fabric on AMD EPYC. A CPU with its own memory and PCIe devices is one NUMA node; reading the other CPU\'s memory crosses this link, so it is slower.',
+    check: 'lscpu and numactl -H show two NUMA nodes. A slow benchmark can be NUMA placement, not a broken part: pin it to one node with numactl and run it again before you blame the hardware.',
+    terms: ['UPI', 'QPI', 'Infinity Fabric', 'NUMA', 'NUMA node', 'numactl'],
     lessons: ['server-anatomy', 'tuning'],
   },
   dimms: {
-    title: 'Memory: 16 DIMMs',
-    text: 'Eight per CPU, populated the same way on both sides. A missing DIMM changes the total and unbalances the channels; correctable ECC errors in the event log point to one that is failing.',
+    title: 'Memory: 16 RDIMMs',
+    text: 'Eight slots per CPU, on its memory channels, filled in the order of the board\'s population table (first slot of each channel first: A1, B1, ...). Servers use registered DIMMs (RDIMM) with ECC, which corrects single-bit errors and reports them.',
+    check: 'Count, size and slots match the BOM and the population table (dmidecode -t memory). A missing DIMM changes the total and unbalances the channels; correctable ECC errors in the event log during burn-in mean a DIMM is failing.',
+    terms: ['DIMM', 'RDIMM', 'ECC', 'memory channel', 'population table'],
     lessons: ['server-anatomy', 'bom-check'],
+    actions: [BUILD],
   },
-  nic: {
-    title: 'Network card: 2 × 25G',
-    text: 'Two ports to the top-of-rack switch, bonded. The link speed, the MTU and the LLDP neighbour are checked on every port.',
-    lessons: ['bond', 'jumbo', 'lldp'],
-  },
-  bmc: {
-    title: 'BMC',
-    text: 'A small computer on the board with its own network port: power control, sensors, the event log, a remote console and firmware updates, over IPMI and Redfish.',
-    lessons: ['ipmi-power', 'redfish', 'sel'],
+  board: {
+    title: 'Motherboard',
+    text: 'The board everything plugs into: the two sockets, the memory slots, the PCIe slots and riser, the M.2 slot, the BIOS chip and the BMC. Supermicro names its generations, for example X13 for Intel and H13 for AMD; the board manual has the population table and the BMC chapter.',
+    check: 'The firmware writes the hardware facts into the SMBIOS tables: vendor, board model, serial number, UUID, BIOS version and every DIMM. dmidecode reads them; the BMC keeps the FRU records (ipmitool fru).',
+    terms: ['motherboard', 'X13 / H13', 'SMBIOS', 'dmidecode', 'UUID', 'FRU'],
+    lessons: ['server-anatomy', 'bom-check'],
   },
   bios: {
     title: 'BIOS flash',
-    text: 'Holds the firmware that starts the server: memory training, finding the devices, then the boot order, from disk or from the network.',
+    text: 'The chip with the firmware that starts the server: POST (memory training, finding every device), then the boot order: disk, network (PXE) or virtual media.',
+    check: 'Its version matches the baseline of the order on every server (dmidecode -s bios-version). Updated with SUM, one server first, then the rest.',
+    terms: ['BIOS', 'UEFI', 'POST', 'boot order', 'firmware baseline'],
     lessons: ['post-boot', 'bios-update', 'pxe'],
   },
+  bmc: {
+    title: 'BMC',
+    text: 'A small computer on the board with its own network port: power control, sensors, the event log, a remote console, virtual media and firmware updates, over IPMI and Redfish. It runs on standby power.',
+    check: 'Reachable on the management network, its firmware on the baseline (ipmitool mc info), the event log saved and cleared after every test run.',
+    terms: ['BMC', 'IPMI', 'Redfish', 'SEL', 'out of band'],
+    lessons: ['ipmi-power', 'redfish', 'sel'],
+  },
+  m2: {
+    title: 'M.2 boot drive',
+    text: 'A small NVMe card that lies flat on the board (M.2 2280: 22 by 80 mm). It often holds the operating system, so the front bays stay free for data. It is not hot-swap: the server has to be opened to change it.',
+    check: 'Seen by the OS like any other drive (nvme list), with the model and firmware the order names.',
+    terms: ['M.2', 'boot drive', 'NVMe'],
+    lessons: ['storage', 'raid-drives'],
+  },
+  riser: {
+    title: 'PCIe riser and slots',
+    text: 'A small board that turns PCIe slots sideways, so full cards fit flat in a 1U chassis. This riser has two slots, x16 and x8, both PCIe Gen5. A slot has 4, 8 or 16 lanes, and each generation doubles the speed per lane: Gen3, Gen4 and Gen5 carry about 1, 2 and 4 GB/s per lane each way.',
+    check: 'Every card trains at its full width and speed: lspci -vv shows LnkCap (what it can do) and LnkSta (what it got). Narrower than capable is a fault: seating, the wrong slot, or a damaged card or riser.',
+    terms: ['riser', 'PCIe', 'lane', 'x4 / x8 / x16', 'Gen3 / Gen4 / Gen5', 'link training', 'LnkCap / LnkSta'],
+    lessons: ['server-anatomy', 'tuning'],
+  },
+  nic: {
+    title: 'Network card: 2 × 25G',
+    text: 'Two ports to the top-of-rack switch, bonded, in the x16 slot of the riser. The onboard ports and the BMC port are separate.',
+    check: 'Link up at the right speed on both ports (ethtool), the right LLDP neighbour on each, bonded as planned, the MTU end to end, and the card at full PCIe width.',
+    terms: ['NIC', '25G', 'bond', 'MTU', 'LLDP', 'ethtool'],
+    lessons: ['bond', 'jumbo', 'lldp'],
+  },
+  hba: {
+    title: 'Storage controller: RAID controller or HBA',
+    text: 'An optional card in the x8 slot. A RAID controller combines disks into virtual disks (RAID 0, 1, 5, 6, 10); an HBA passes every disk through as it is (JBOD), for software such as ZFS or Ceph. The NVMe drives of this server go straight to the CPUs; a card like this is for SAS and SATA drives or an external disk shelf.',
+    check: 'The BOM says which one, with its model and firmware. Check the virtual disks and their state with the vendor tool (for Broadcom cards, storcli), and that the OS sees the right number of disks.',
+    terms: ['RAID controller', 'HBA', 'RAID 0 / 1 / 5 / 6 / 10', 'JBOD'],
+    lessons: ['storage', 'raid-drives'],
+  },
   psus: {
-    title: 'Two power supplies',
-    text: 'PSU 1 on feed A, PSU 2 on feed B. Either one can run the server alone, but the server only counts as redundant when both have input.',
+    title: 'Two power supplies (1+1)',
+    text: 'PSU 1 on feed A, PSU 2 on feed B. Either one can run the server alone, but the server only counts as redundant when both have input. Hot air leaves through them at the back.',
+    check: 'Both show input (ipmitool sdr type "Power Supply"). During burn-in, switch one feed off: nothing may go down, and the event log records it.',
+    terms: ['PSU', '1+1', 'PDU', 'feed A / B'],
     lessons: ['thermal'],
   },
 }
