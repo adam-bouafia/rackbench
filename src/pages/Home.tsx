@@ -184,6 +184,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
           <ul>
             {[
               ['#/practice', 'Rack Shift: build, test and ship racks'],
+              ['#/practice/build', 'Build a server: parts into a 1U'],
               ['#/practice/hunt', 'Fault hunt: find the broken node'],
               ['#/practice/quiz', 'Quiz: 15 questions'],
               ['#/lab', 'Rack Lab: build and power a rack'],

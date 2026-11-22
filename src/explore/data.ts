@@ -66,6 +66,7 @@ export function rackParts(type: RackType): Part[] {
 
 const RACK_LAB: Action = { label: 'Build one in Rack Lab', hash: '#/lab' }
 const RACK_SHIFT: Action = { label: 'Play Rack Shift', hash: '#/practice' }
+const BUILD: Action = { label: 'Build a server yourself', hash: '#/practice/build' }
 
 export const LEVELS: Record<Level, { text: string; facts: string[]; lessons: string[]; hint: string; actions?: Action[] }> = {
   hall: {
@@ -111,6 +112,7 @@ export const LEVELS: Record<Level, { text: string; facts: string[]; lessons: str
     ],
     lessons: ['server-anatomy', 'post-boot', 'storage', 'thermal', 'ipmi-power', 'tuning'],
     hint: 'Click a part for what it does and how it is tested.',
+    actions: [BUILD],
   },
 }
 
