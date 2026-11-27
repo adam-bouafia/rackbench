@@ -3,6 +3,7 @@ import { RackShift } from '../game/RackShift'
 import { ServerBuild } from '../game/ServerBuild'
 import { RaidRescue } from '../game/RaidRescue'
 import { PipePuzzle } from '../game/PipePuzzle'
+import { PatchIt } from '../game/PatchIt'
 import { Quiz } from './Quiz'
 import { Flashcards } from './Flashcards'
 import { useT } from '../i18n'
@@ -14,6 +15,7 @@ export function Practice({ tab, go }: { tab: PracticeTab; go: (h: string) => voi
     ['shift', '#/practice', t('rackShift')],
     ['build', '#/practice/build', 'Build a server'],
     ['raid', '#/practice/raid', 'RAID Rescue'],
+    ['patch', '#/practice/patch', 'Patch it'],
     ['pipes', '#/practice/pipes', 'Pipe puzzle'],
     ['hunt', '#/practice/hunt', t('faultHunt')],
     ['quiz', '#/practice/quiz', t('quiz')],
@@ -34,6 +36,8 @@ export function Practice({ tab, go }: { tab: PracticeTab; go: (h: string) => voi
         <ServerBuild />
       ) : tab === 'raid' ? (
         <RaidRescue />
+      ) : tab === 'patch' ? (
+        <PatchIt />
       ) : tab === 'pipes' ? (
         <PipePuzzle />
       ) : tab === 'hunt' ? (

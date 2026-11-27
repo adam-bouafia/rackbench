@@ -171,7 +171,49 @@ $ ssh rk-n2 uptime
   ],
 }
 
-export const FLOWS4: Record<string, Flow> = { isolate }
+
+const remoteHands: Flow = {
+  intro: [
+    'Most work on a colocation or customer data center floor arrives as a ticket: a client somewhere else asks the on-site technician to be their hands. This lesson follows one ticket from arrival to closure, with the checks that keep a technician trusted.',
+  ],
+  keyPoints: [
+    'Read the whole ticket and its procedure before moving; ask when anything is unclear.',
+    'Match location, serial and part before touching anything; stop and escalate when the facts differ.',
+    'Photos and command output before and after; the client confirms; the records are updated.',
+  ],
+  actors: [
+    { id: 'client', label: 'Client NOC', sub: 'remote, owns the servers', x: 110, y: 130, kind: 'person' },
+    { id: 'ticket', label: 'Ticket system', sub: 'ticket 48213 · P3', x: 400, y: 330, kind: 'service' },
+    { id: 'tech', label: 'You', sub: 'technician on shift', x: 690, y: 130, kind: 'person' },
+    { id: 'spares', label: 'Spares and RMA', sub: 'parts store', x: 980, y: 330, kind: 'service' },
+    { id: 'rack', label: 'Rack C04', sub: 'U30 · S/N RL2611-012', x: 1250, y: 130, kind: 'server' },
+  ],
+  links: [
+    ['client', 'ticket'],
+    ['ticket', 'tech'],
+    ['tech', 'spares'],
+    ['tech', 'rack'],
+  ],
+  steps: [
+    { from: 'client', to: 'ticket', proto: 'Event', summary: 'A ticket arrives: replace a failed disk', explain: ['The client\'s monitoring saw a disk fail and opens a remote-hands ticket: site, hall, rack, unit, serial, bay, the part, a priority (P3: within 4 hours) and the client contact.', 'Remote hands means simple tasks on request (reseat a cable, swap a disk); smart hands means more involved work, often with a written procedure (MOP).'], raw: `Ticket 48213 · Priority P3 · due 14:30
+Site AMS-2, hall 3, rack C04, U30, S/N RL2611-012
+Task: replace failed disk in bay 5 (RAID 1, hot-swap)
+Part: 7.68 TB SAS SSD, PN 0X2DH3 · Contact: NOC +31 20 ...`, rawLabel: 'The ticket', state: { ticket: { text: 'new', tone: 'info' } } },
+    { from: 'ticket', to: 'tech', proto: 'Event', summary: 'Read it all before moving', explain: ['Read the whole ticket and any attached procedure. Is the work inside an approved change window? Is anything unclear: which bay, whether the server may stay on, who to call?', 'Ask before you start, not halfway. A question costs minutes; a wrong pull costs a client outage.'], state: { tech: { text: 'scope clear', tone: 'ok' }, ticket: { text: 'accepted', tone: 'info' } } },
+    { from: 'tech', to: 'spares', proto: 'Tool', summary: 'Get the part and check it matches', explain: ['Take the replacement from the client\'s spares (or the vendor shipment) and compare part numbers with the ticket and the failed drive\'s label. Note the new serial: it goes into the ticket and the asset records.', 'A wrong or incompatible part is found here, not in the rack.'], state: { spares: { text: 'PN matches', tone: 'ok' } } },
+    { from: 'tech', to: 'rack', proto: 'Board', summary: 'Find the server and confirm it', explain: ['UID light on, rack and unit match, serial on the pull-out tag matches the ticket, amber fault light on bay 5. All four, or you stop.'], state: { rack: { text: 'located, bay 5 amber', tone: 'warn' } } },
+    { from: 'tech', to: 'client', proto: 'Event', summary: 'Call before you pull', explain: ['Many clients want a go before any hands-on work: they check from their side that the array is healthy apart from that disk and that nothing else is running. Give your name, the ticket, the server and what you are about to do.'], state: { client: { text: 'go given', tone: 'ok' } } },
+    { from: 'tech', to: 'rack', proto: 'Board', summary: 'Do the work, with photos before and after', explain: ['Photo of the front with the fault light and the serial tag; swap the disk; photo again with the new disk in place and its activity light.', 'Touch nothing else in the rack. If a cable is in the way, note it rather than re-route someone else\'s cabling.'], state: { rack: { text: 'new disk in, rebuilding', tone: 'info' } } },
+    { from: 'rack', to: 'client', proto: 'Link', summary: 'The client confirms from their side', explain: ['The client sees the new disk and the rebuild running. Only they can confirm their service is fine; ask them to say so in the ticket.'], state: { client: { text: 'rebuild seen', tone: 'ok' } } },
+    { from: 'tech', to: 'spares', proto: 'Tool', summary: 'The failed part: RMA or shred', explain: ['Log the failed drive\'s serial. Per the client\'s policy it goes back to the vendor with an RMA number, or stays on site for wiping or shredding: data-bearing parts never leave without permission.'], state: { spares: { text: 'RMA logged', tone: 'ok' } } },
+    { from: 'tech', to: 'ticket', proto: 'Local', summary: 'Close with evidence and updated records', explain: ['Write what you did, the old and new serials, the times, the photos, and the client\'s confirmation. Update the asset database (DCIM): new serial in bay 5.', 'Anything still running (a rebuild) goes into the shift handover, so the next technician knows.'], raw: `48213 done 13:52. Bay 5 S6KNNA0T812345 -> S6KNNA0T899102 (PN 0X2DH3).
+Photos before/after attached. Rebuild started 13:41, client confirmed 13:50.
+Failed drive kept on site for shredding (client policy), log #771. DCIM updated.`, rawLabel: 'The closing note', state: { ticket: { text: 'closed', tone: 'ok' }, tech: { text: 'handover noted', tone: 'ok' } } },
+    { from: 'tech', to: 'client', proto: 'Event', summary: 'When the facts do not match: stop and escalate', explain: ['If the serial is different, the fault light is on another bay, or a second disk is also failed: do not improvise. Stop, write what you found in the ticket, call the client and your shift lead, and wait for a decision.', 'Escalating is part of the job. Guessing on someone else\'s production server is not.'], state: { client: { text: 'informed', tone: 'info' } } },
+  ],
+}
+
+export const FLOWS4: Record<string, Flow> = { isolate, 'remote-hands': remoteHands }
 
 interface StepExtra {
   short: string
@@ -181,6 +223,25 @@ interface StepExtra {
 }
 
 export const EXTRAS4: Record<string, { metrics: Metric[]; appear?: Record<string, number>; steps: StepExtra[] }> = {
+  'remote-hands': {
+    metrics: [
+      { id: 'ticket', label: 'Ticket', start: '-' },
+      { id: 'sla', label: 'Time left', start: '-' },
+      { id: 'evidence', label: 'Evidence', start: 'none' },
+    ],
+    steps: [
+      { short: 'Ticket', m: { ticket: 'new, P3', sla: '4 h' }, key: 'A ticket names place, serial, part, priority and contact.' },
+      { short: 'Read it', tag: 'action', m: { ticket: 'accepted' }, key: 'Ask before you start, not halfway.' },
+      { short: 'Part', tag: 'action', key: 'Check the part number before you walk to the rack.' },
+      { short: 'Locate', tag: 'action', m: { sla: '3 h 20' }, key: 'Rack, UID light, serial, fault light: all must match.' },
+      { short: 'Call', key: 'Get the go before hands-on work.' },
+      { short: 'Swap', tag: 'action', m: { evidence: 'photos before/after' } },
+      { short: 'Confirm', m: { evidence: '+ client confirmation' } },
+      { short: 'RMA', key: 'Data-bearing parts leave only under the client\'s policy.' },
+      { short: 'Close', tag: 'result', m: { ticket: 'closed', sla: 'met', evidence: 'complete' }, key: 'A ticket closes with evidence and updated records.' },
+      { short: 'Escalate', tag: 'technique', key: 'When the facts differ: stop, write it down, escalate.' },
+    ],
+  },
   isolate: {
     metrics: [
       { id: 'power', label: 'Power', start: '?' },

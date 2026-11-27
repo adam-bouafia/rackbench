@@ -36,7 +36,7 @@ const WIDGETS: Record<string, ComponentType<{ meta: LessonMeta }>> = {
   'raid-drives': RaidDrives,
 }
 
-export type PracticeTab = 'shift' | 'build' | 'raid' | 'pipes' | 'hunt' | 'quiz' | 'cards'
+export type PracticeTab = 'shift' | 'build' | 'raid' | 'patch' | 'pipes' | 'hunt' | 'quiz' | 'cards'
 
 type Route =
   | { page: 'home' }
@@ -54,6 +54,7 @@ function parse(hash: string): Route {
   if (h === '/practice' || h === '/practice/shift' || h === '/shift') return { page: 'practice', tab: 'shift' }
   if (h === '/practice/build') return { page: 'practice', tab: 'build' }
   if (h === '/practice/raid' || h === '/raid') return { page: 'practice', tab: 'raid' }
+  if (h === '/practice/patch' || h === '/patch') return { page: 'practice', tab: 'patch' }
   if (h === '/practice/pipes' || h === '/pipes') return { page: 'practice', tab: 'pipes' }
   if (h === '/practice/cards' || h === '/flashcards') return { page: 'practice', tab: 'cards' }
   if (h === '/practice/hunt' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
@@ -121,10 +122,11 @@ function Search({ go }: { go: (h: string) => void }) {
       { hash: '#/practice', title: 'Rack Shift', sub: 'Game: build, cable, test and ship three racks', kind: 'Practice', hay: 'rack shift game build cable burn-in report ship integration play' },
       { hash: '#/practice/build', title: 'Build a server', sub: 'Assemble a two-socket server from the order, then power it on', kind: 'Practice', hay: 'build server assemble cpu dimm memory population nvme psu fan heatsink esd game' },
       { hash: '#/practice/raid', title: 'RAID Rescue', sub: 'Game: ten arrays per shift. Survive or lose, capacity, XOR rebuilds, pick the level', kind: 'Practice', hay: 'raid rescue game parity xor capacity rebuild degraded mirror stripe level jbod' },
+      { hash: '#/practice/patch', title: 'Patch it', sub: 'Game: work orders on the floor. Pick the optic and cable, fix polarity, read the light', kind: 'Practice', hay: 'patch it game fibre fiber optic dac aoc polarity light dbm cleaning cabling work order data center technician' },
       { hash: '#/practice/pipes', title: 'Pipe puzzle', sub: 'Game: build the Linux pipeline that answers the question', kind: 'Practice', hay: 'pipe puzzle linux bash grep awk sort uniq wc head game commands' },
       { hash: '#/practice/cards', title: 'Flashcards', sub: 'Interview questions, RAID, commands and every term, part by part', kind: 'Practice', hay: 'flashcards cards terms memorize study interview questions deck' },
       { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
-      { hash: '#/practice/quiz', title: 'Quiz', sub: `${QUESTIONS.length} questions in eight topics`, kind: 'Practice', hay: 'quiz questions test interview raid power linux troubleshooting' },
+      { hash: '#/practice/quiz', title: 'Quiz', sub: `${QUESTIONS.length} questions in nine topics`, kind: 'Practice', hay: 'quiz questions test interview raid power linux troubleshooting' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
       { hash: '#/explore/C/C01/node01', title: 'Inside a server', sub: 'Every part of a 1U two-socket server: click it for what it is and how it is checked', kind: 'Explore', hay: 'inside server parts anatomy motherboard cpu socket upi numa dimm rdimm ecc riser pcie nic hba raid m.2 backplane fans sensors psu bmc bios serial fru chassis' },
       { hash: '#/explore', title: 'Data center explorer', sub: 'Zoom from the data hall into a row, a rack and a server', kind: 'Explore', hay: 'data center hall row rack server aisle cooling power ups crah busway explore zoom' },
@@ -206,7 +208,7 @@ function Search({ go }: { go: (h: string) => void }) {
 
 /* ---------- course tree and progress ---------- */
 
-const PRACTICE_IDS = ['rack-shift', 'server-build', 'raid-rescue', 'pipe-puzzle', 'fault-hunt', 'quiz', 'flashcards', 'rack-lab']
+const PRACTICE_IDS = ['rack-shift', 'server-build', 'raid-rescue', 'patch-it', 'pipe-puzzle', 'fault-hunt', 'quiz', 'flashcards', 'rack-lab']
 
 function Folder({ color, open }: { color: string; open: boolean }) {
   return (

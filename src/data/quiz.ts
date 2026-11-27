@@ -10,7 +10,7 @@ export interface Q {
   topic: Topic
 }
 
-export type Topic = 'raid' | 'power' | 'linux' | 'trouble' | 'bmc' | 'net' | 'test' | 'rack'
+export type Topic = 'raid' | 'power' | 'linux' | 'trouble' | 'bmc' | 'net' | 'test' | 'rack' | 'floor'
 
 export const TOPICS: { id: Topic; title: string }[] = [
   { id: 'raid', title: 'RAID and storage' },
@@ -21,6 +21,7 @@ export const TOPICS: { id: Topic; title: string }[] = [
   { id: 'net', title: 'Network' },
   { id: 'test', title: 'Testing' },
   { id: 'rack', title: 'Building a rack' },
+  { id: 'floor', title: 'Data center floor' },
 ]
 
 export const QUESTIONS: Q[] = [
@@ -83,6 +84,24 @@ export const QUESTIONS: Q[] = [
   { topic: 'linux', q: 'What does `cmd > out.txt 2>&1` do?', options: ['Sends errors to the screen', 'Writes both the output and the error messages to out.txt', 'Appends to out.txt', 'Runs cmd twice'], answer: 1, why: '> sends stdout to the file; 2>&1 sends stderr to the same place.', lesson: 'linux-pipes' },
   { topic: 'linux', q: 'In a loop over nodes, what do `&` and `wait` do?', options: ['& joins commands, wait sleeps 1 s', '& runs each command in the background so nodes work in parallel; wait holds until all finish', 'Both are for errors', '& is AND'], answer: 1, why: 'Without &, the nodes run one after another; wait makes sure every result is in before the script reads them.', lesson: 'linux-pipes' },
   { topic: 'linux', q: 'Which command shows only the lines that do NOT contain PASS?', options: ['grep PASS', 'grep -v PASS', 'grep -c PASS', 'grep -i PASS'], answer: 1, why: '-v inverts the match; -c counts and -i ignores case.', lesson: 'linux-pipes' },
+  // data center floor
+  { topic: 'floor', q: 'A yellow fibre patch cord is almost always...', options: ['OM3 multimode', 'OS2 single-mode', 'OM4 multimode', 'Copper twinax'], answer: 1, why: 'Yellow jackets are single-mode; aqua or violet are OM3/OM4, lime is OM5, orange is old OM1/OM2. The print on the jacket confirms it.', lesson: 'fiber-basics' },
+  { topic: 'floor', q: 'Which fibre goes with an SFP28 SR module?', options: ['OS2 single-mode', 'OM3 or OM4 multimode', 'Cat6A', 'Any fibre'], answer: 1, why: 'SR is short reach at 850 nm on multimode. LR modules (1310 nm) need single-mode.', lesson: 'fiber-basics' },
+  { topic: 'floor', q: 'How far does 25G short-reach run on OM4?', options: ['About 30 m', 'About 100 m', 'About 400 m', 'About 10 km'], answer: 1, why: 'About 100 m on OM4 and 70 m on OM3. At 10G the same fibre reaches 300-400 m.', lesson: 'fiber-basics' },
+  { topic: 'floor', q: 'What must never be mated with a green APC connector?', options: ['Another APC connector', 'A blue UPC connector', 'An LC dust cap', 'An inspection scope'], answer: 1, why: 'APC end faces are angled at 8°; a flat UPC face against it leaves a gap and damages both.', lesson: 'fiber-basics' },
+  { topic: 'floor', q: 'A new duplex fibre link stays down and the optic reports -inf dBm received. Most likely?', options: ['A dirty connector', 'Polarity: TX meets TX', 'Wrong VLAN', 'Bad DIMM'], answer: 1, why: 'No light at all on a fresh link points to polarity or the wrong strand. Weak light points to dirt.', lesson: 'fiber-polarity' },
+  { topic: 'floor', q: 'A link goes through cord, panel, trunk, panel, cord. When does it work?', options: ['When there are no crossings', 'When the total number of crossings is odd', 'When the number is even', 'Always'], answer: 1, why: 'End to end, TX must meet RX: an odd number of crossings.', lesson: 'fiber-polarity' },
+  { topic: 'floor', q: 'On a 100G-SR4 MPO-12 link, which fibres carry light?', options: ['All 12', 'Fibres 1-4 send and 9-12 receive', 'Only 1 and 12', 'Fibres 5-8'], answer: 1, why: 'Four lanes each way; the middle four stay dark.', lesson: 'fiber-polarity' },
+  { topic: 'floor', q: 'The link is up but CRC errors climb and Rx power is -11.8 dBm, under the warning threshold. First step?', options: ['Replace the switch', 'Inspect and clean both ends of every connection on the path', 'Flip the polarity', 'Reboot the server'], answer: 1, why: 'Weak light with errors is the classic dirty connector. Inspect, clean, inspect again, retest.', lesson: 'fiber-clean' },
+  { topic: 'floor', q: 'Before plugging in a fibre connector, what do you do?', options: ['Blow on it', 'Inspect it, and clean if needed', 'Wipe it on your sleeve', 'Nothing if it had a dust cap'], answer: 1, why: 'Inspect before you connect, every time: dust caps are not a guarantee.', lesson: 'fiber-clean' },
+  { topic: 'floor', q: 'Which cable runs 10GBASE-T for the full 100 m?', options: ['Cat5e', 'Cat6', 'Cat6A', 'Any of them'], answer: 2, why: 'Cat6 manages 10G only to about 55 m; Cat6A does the full 100 m channel.', lesson: 'copper' },
+  { topic: 'floor', q: 'A cable passes the wiremap test but errors at 10G. What fault fits?', options: ['Open wire', 'Split pair', 'Reversed pair', 'Short'], answer: 1, why: 'A split pair has the right pins but the wrong wires twisted together: only a certifier\'s crosstalk test catches it.', lesson: 'copper' },
+  { topic: 'floor', q: 'Server to top-of-rack switch, 25G, 2 m. The usual choice?', options: ['SR optics and OM4', 'An SFP28 DAC', 'LR optics and OS2', 'Cat6A'], answer: 1, why: 'Inside the rack a DAC is cheaper, uses less power and has nothing to clean.', lesson: 'copper' },
+  { topic: 'floor', q: 'Before pulling a failed hot-swap disk, what must you check?', options: ['Nothing, it has failed', 'That it is the right server and bay, and every other disk in the array is online', 'That the server is off', 'That the fans are at full speed'], answer: 1, why: 'Pulling the wrong disk, or one from an array that is already degraded, can lose the array.', lesson: 'fru-swap' },
+  { topic: 'floor', q: 'Can a DIMM be replaced while the server runs?', options: ['Yes, like disks', 'No: shut down, unplug both cords, ESD strap, then swap', 'Only on Tuesdays', 'Only with the lid on'], answer: 1, why: 'Memory is not hot-swap. Agree a window with the client first.', lesson: 'fru-swap' },
+  { topic: 'floor', q: 'Before pulling PSU 2, what do you confirm?', options: ['That PSU 1 is healthy and its feed is live', 'That the server is off', 'That PSU 2 is still green', 'Nothing'], answer: 0, why: 'PSU 1 must carry the whole server while PSU 2 is out.', lesson: 'fru-swap' },
+  { topic: 'floor', q: 'The serial on the server does not match the ticket. What now?', options: ['Do the work on this server anyway', 'Stop, note it in the ticket and escalate to the client and shift lead', 'Swap the labels', 'Pick the closest serial'], answer: 1, why: 'Never improvise on someone else\'s production hardware: stop and escalate.', lesson: 'remote-hands' },
+  { topic: 'floor', q: 'A failed drive that held client data. Where does it go?', options: ['Always back to the vendor', 'Where the client\'s policy says: often kept on site and wiped or shredded', 'In the bin', 'Home with you'], answer: 1, why: 'Data-bearing parts leave the site only under the client\'s policy; log the serial either way.', lesson: 'fru-swap' },
   // troubleshooting
   { topic: 'trouble', q: 'A node in a new rack is not reachable. Where do you start?', options: ['Reinstall the OS', 'At the bottom: power, then the BMC, console, link, switch, OS', 'The switch configuration', 'Replace the server'], answer: 1, why: 'A low fault (no power, no link) causes every symptom above it. Prove each layer before moving up.', lesson: 'isolate' },
   { topic: 'trouble', q: 'Power is on, the BMC answers, the OS console shows a login prompt, but there is no network. Next?', options: ['Replace the motherboard', 'Check the link: ethtool, the cable or optic, the switch port', 'Update the BIOS', 'Clear the SEL'], answer: 1, why: 'The OS is up, so the fault is between the NIC and the network.', lesson: 'isolate' },

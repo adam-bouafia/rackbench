@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { INTERVIEW_CARDS, RAID_CARDS, type Card } from '../data/cards'
+import { FLOOR_CARDS, INTERVIEW_CARDS, RAID_CARDS, type Card } from '../data/cards'
 import { TERMS } from '../data/terms'
 import { SHEETS } from './Cheatsheets'
 import { markDone } from '../progress'
@@ -17,6 +17,7 @@ interface Deck {
 const DECKS: Deck[] = [
   { id: 'interview', title: 'Interview questions', group: 'Topics', note: 'Questions reported for rack engineer interviews, with short answers', cards: INTERVIEW_CARDS },
   { id: 'raid', title: 'RAID and storage', group: 'Topics', note: 'Levels, parity, rebuilds, SATA and SAS', cards: RAID_CARDS },
+  { id: 'floor', title: 'Data center floor', group: 'Topics', note: 'Fibre, copper, light levels, part swaps, tickets', cards: FLOOR_CARDS },
   {
     id: 'commands',
     title: 'Which command?',
