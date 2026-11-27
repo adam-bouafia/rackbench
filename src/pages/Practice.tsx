@@ -1,28 +1,48 @@
 import { FaultHunt } from '../hunt/FaultHunt'
 import { RackShift } from '../game/RackShift'
 import { ServerBuild } from '../game/ServerBuild'
+import { RaidRescue } from '../game/RaidRescue'
+import { PipePuzzle } from '../game/PipePuzzle'
 import { Quiz } from './Quiz'
+import { Flashcards } from './Flashcards'
 import { useT } from '../i18n'
+import type { PracticeTab } from '../App'
 
-export function Practice({ tab, go }: { tab: 'shift' | 'build' | 'hunt' | 'quiz'; go: (h: string) => void }) {
+export function Practice({ tab, go }: { tab: PracticeTab; go: (h: string) => void }) {
   const t = useT()
+  const tabs: [PracticeTab, string, string][] = [
+    ['shift', '#/practice', t('rackShift')],
+    ['build', '#/practice/build', 'Build a server'],
+    ['raid', '#/practice/raid', 'RAID Rescue'],
+    ['pipes', '#/practice/pipes', 'Pipe puzzle'],
+    ['hunt', '#/practice/hunt', t('faultHunt')],
+    ['quiz', '#/practice/quiz', t('quiz')],
+    ['cards', '#/practice/cards', 'Flashcards'],
+  ]
   return (
     <div className="practice">
       <div className="practice-tabs seg">
-        <button className={tab === 'shift' ? 'on' : ''} onClick={() => go('#/practice')}>
-          {t('rackShift')}
-        </button>
-        <button className={tab === 'build' ? 'on' : ''} onClick={() => go('#/practice/build')}>
-          Build a server
-        </button>
-        <button className={tab === 'hunt' ? 'on' : ''} onClick={() => go('#/practice/hunt')}>
-          {t('faultHunt')}
-        </button>
-        <button className={tab === 'quiz' ? 'on' : ''} onClick={() => go('#/practice/quiz')}>
-          {t('quiz')}
-        </button>
+        {tabs.map(([id, hash, label]) => (
+          <button key={id} className={tab === id ? 'on' : ''} onClick={() => go(hash)}>
+            {label}
+          </button>
+        ))}
       </div>
-      {tab === 'shift' ? <RackShift /> : tab === 'build' ? <ServerBuild /> : tab === 'hunt' ? <FaultHunt /> : <Quiz />}
+      {tab === 'shift' ? (
+        <RackShift />
+      ) : tab === 'build' ? (
+        <ServerBuild />
+      ) : tab === 'raid' ? (
+        <RaidRescue />
+      ) : tab === 'pipes' ? (
+        <PipePuzzle />
+      ) : tab === 'hunt' ? (
+        <FaultHunt />
+      ) : tab === 'quiz' ? (
+        <Quiz />
+      ) : (
+        <Flashcards />
+      )}
     </div>
   )
 }

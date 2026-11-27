@@ -69,7 +69,7 @@ export interface Flow {
   tryIt?: { cmd: string; note?: string }[]
 }
 
-export type LessonKind = 'flow' | 'widget'
+export type LessonKind = 'flow' | 'widget' | 'stage'
 
 export interface LessonMeta {
   id: string

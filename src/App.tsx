@@ -3,6 +3,9 @@ import { CHAPTERS, LESSONS, lessonById } from './lessons/index'
 import { FLOWS } from './lessons/all'
 import type { LessonMeta } from './engine/types'
 import { FlowLessonView, WidgetLessonView } from './engine/LessonView'
+import { StageLessonView } from './engine/StageLesson'
+import { STAGES } from './lessons/stages'
+import { QUESTIONS } from './data/quiz'
 import { RackTour } from './widgets/RackTour'
 import { ServerAnatomy } from './widgets/ServerAnatomy'
 import { BomCheck } from './widgets/BomCheck'
@@ -33,10 +36,12 @@ const WIDGETS: Record<string, ComponentType<{ meta: LessonMeta }>> = {
   'raid-drives': RaidDrives,
 }
 
+export type PracticeTab = 'shift' | 'build' | 'raid' | 'pipes' | 'hunt' | 'quiz' | 'cards'
+
 type Route =
   | { page: 'home' }
   | { page: 'lesson'; id: string }
-  | { page: 'practice'; tab: 'shift' | 'build' | 'hunt' | 'quiz' }
+  | { page: 'practice'; tab: PracticeTab }
   | { page: 'lab' }
   | { page: 'sheets' }
   | { page: 'labs' }
@@ -48,6 +53,9 @@ function parse(hash: string): Route {
   if (h === '/' || h === '' || h === '/overview') return { page: 'home' }
   if (h === '/practice' || h === '/practice/shift' || h === '/shift') return { page: 'practice', tab: 'shift' }
   if (h === '/practice/build') return { page: 'practice', tab: 'build' }
+  if (h === '/practice/raid' || h === '/raid') return { page: 'practice', tab: 'raid' }
+  if (h === '/practice/pipes' || h === '/pipes') return { page: 'practice', tab: 'pipes' }
+  if (h === '/practice/cards' || h === '/flashcards') return { page: 'practice', tab: 'cards' }
   if (h === '/practice/hunt' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
   if (h === '/practice/quiz') return { page: 'practice', tab: 'quiz' }
   if (h === '/lab') return { page: 'lab' }
@@ -112,8 +120,11 @@ function Search({ go }: { go: (h: string) => void }) {
       ...LESSONS.map((l) => ({ hash: `#/lesson/${l.id}`, title: l.title, sub: l.blurb, kind: 'Lesson', hay: `${l.title} ${l.blurb} ${l.keywords.join(' ')}` })),
       { hash: '#/practice', title: 'Rack Shift', sub: 'Game: build, cable, test and ship three racks', kind: 'Practice', hay: 'rack shift game build cable burn-in report ship integration play' },
       { hash: '#/practice/build', title: 'Build a server', sub: 'Assemble a two-socket server from the order, then power it on', kind: 'Practice', hay: 'build server assemble cpu dimm memory population nvme psu fan heatsink esd game' },
+      { hash: '#/practice/raid', title: 'RAID Rescue', sub: 'Game: ten arrays per shift. Survive or lose, capacity, XOR rebuilds, pick the level', kind: 'Practice', hay: 'raid rescue game parity xor capacity rebuild degraded mirror stripe level jbod' },
+      { hash: '#/practice/pipes', title: 'Pipe puzzle', sub: 'Game: build the Linux pipeline that answers the question', kind: 'Practice', hay: 'pipe puzzle linux bash grep awk sort uniq wc head game commands' },
+      { hash: '#/practice/cards', title: 'Flashcards', sub: 'Interview questions, RAID, commands and every term, part by part', kind: 'Practice', hay: 'flashcards cards terms memorize study interview questions deck' },
       { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
-      { hash: '#/practice/quiz', title: 'Quiz', sub: '15 questions from real rack work', kind: 'Practice', hay: 'quiz questions test interview' },
+      { hash: '#/practice/quiz', title: 'Quiz', sub: `${QUESTIONS.length} questions in eight topics`, kind: 'Practice', hay: 'quiz questions test interview raid power linux troubleshooting' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
       { hash: '#/explore/C/C01/node01', title: 'Inside a server', sub: 'Every part of a 1U two-socket server: click it for what it is and how it is checked', kind: 'Explore', hay: 'inside server parts anatomy motherboard cpu socket upi numa dimm rdimm ecc riser pcie nic hba raid m.2 backplane fans sensors psu bmc bios serial fru chassis' },
       { hash: '#/explore', title: 'Data center explorer', sub: 'Zoom from the data hall into a row, a rack and a server', kind: 'Explore', hay: 'data center hall row rack server aisle cooling power ups crah busway explore zoom' },
@@ -194,6 +205,8 @@ function Search({ go }: { go: (h: string) => void }) {
 }
 
 /* ---------- course tree and progress ---------- */
+
+const PRACTICE_IDS = ['rack-shift', 'server-build', 'raid-rescue', 'pipe-puzzle', 'fault-hunt', 'quiz', 'flashcards', 'rack-lab']
 
 function Folder({ color, open }: { color: string; open: boolean }) {
   return (
@@ -328,7 +341,7 @@ function CourseNav({ route, link }: { route: Route; link: (h: string) => (e: Mou
               <span className="dot" style={{ background: 'var(--c-practice)' }} />
               <span className="pl-name">Practice</span>
               <span className="pl-n">
-                {['rack-shift', 'server-build', 'fault-hunt', 'quiz', 'rack-lab'].filter((id) => done.includes(id)).length}/5
+                {PRACTICE_IDS.filter((id) => done.includes(id)).length}/{PRACTICE_IDS.length}
               </span>
             </li>
           </ul>
@@ -416,6 +429,8 @@ export function App() {
     main =
       meta.kind === 'flow' && FLOWS[meta.id] ? (
         <FlowLessonView key={meta.id} meta={meta} flow={FLOWS[meta.id]} />
+      ) : meta.kind === 'stage' && STAGES[meta.id] ? (
+        <StageLessonView key={meta.id} meta={meta} def={STAGES[meta.id]} />
       ) : W ? (
         <WidgetLessonView key={meta.id} meta={meta}>
           <W meta={meta} />
