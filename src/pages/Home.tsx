@@ -73,7 +73,7 @@ export function Home({ go }: { go: (hash: string) => void }) {
       <section className="panel ov-hero">
         <p className="eyebrow">{SITE.name} · overview</p>
         <h1>{SITE.tagline}</h1>
-        <p className="lead">Build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, report and ship. {LESSONS.length} lessons, five games, flashcards, and a real lab behind it all.</p>
+        <p className="lead">Build it from the order, check every cable, power it on through the BMC, burn it in, find the failing part, report and ship. {LESSONS.length} lessons, seven games, flashcards, a toolbox, and a real lab behind it all.</p>
         <div className="hero-actions">
           <a className="btn btn-primary" href={`#/lesson/${next.id}`} onClick={link(`#/lesson/${next.id}`)}>
             {count ? 'Continue the course' : 'Start the course'} →
@@ -191,10 +191,13 @@ export function Home({ go }: { go: (hash: string) => void }) {
               ['#/practice/build', 'Build a server: parts into a 1U'],
               ['#/practice/raid', 'RAID Rescue: ten arrays to save'],
               ['#/practice/patch', 'Patch it: fibre work orders'],
+              ['#/practice/walk', 'Floor walk: spot what is wrong'],
+              ['#/toolbox/pack', 'Pack the bag: tools for the job'],
               ['#/practice/pipes', 'Pipe puzzle: Linux one-liners'],
               ['#/practice/hunt', 'Fault hunt: find the broken node'],
               ['#/practice/quiz', `Quiz: ${QUESTIONS.length} questions`],
               ['#/practice/cards', 'Flashcards: every term, part by part'],
+              ['#/toolbox', 'Toolbox: every tool, what and how'],
               ['#/lab', 'Rack Lab: build and power a rack'],
               ['#/labs', 'Run it yourself: 13 labs'],
             ].map(([h, t]) => (

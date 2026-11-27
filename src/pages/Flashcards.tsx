@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { FLOOR_CARDS, INTERVIEW_CARDS, RAID_CARDS, type Card } from '../data/cards'
+import { FLOOR_CARDS, INTERVIEW_CARDS, NET_CARDS, RAID_CARDS, SAFETY_CARDS, type Card } from '../data/cards'
+import { TOOLS } from '../data/tools'
 import { TERMS } from '../data/terms'
 import { SHEETS } from './Cheatsheets'
 import { markDone } from '../progress'
@@ -17,7 +18,10 @@ interface Deck {
 const DECKS: Deck[] = [
   { id: 'interview', title: 'Interview questions', group: 'Topics', note: 'Questions reported for rack engineer interviews, with short answers', cards: INTERVIEW_CARDS },
   { id: 'raid', title: 'RAID and storage', group: 'Topics', note: 'Levels, parity, rebuilds, SATA and SAS', cards: RAID_CARDS },
-  { id: 'floor', title: 'Data center floor', group: 'Topics', note: 'Fibre, copper, light levels, part swaps, tickets', cards: FLOOR_CARDS },
+  { id: 'floor', title: 'Data center floor', group: 'Topics', note: 'Rack and stack, fibre, copper, cross-connects, part swaps, tickets', cards: FLOOR_CARDS },
+  { id: 'safety', title: 'Safety, security and changes', group: 'Topics', note: 'ESD, lifting, fire and EPO, access, chain of custody, MOPs, handovers', cards: SAFETY_CARDS },
+  { id: 'network', title: 'Network basics', group: 'Topics', note: 'Layers, switches, ARP, VLANs, subnets, ping and DHCP', cards: NET_CARDS },
+  { id: 'tools', title: 'Tools of the trade', group: 'Topics', note: 'The tool on the front, what it is for on the back', cards: TOOLS.map((t) => ({ front: t.name, back: `${t.what} ${t.when}` })) },
   {
     id: 'commands',
     title: 'Which command?',
@@ -58,7 +62,7 @@ const shuffle = <T,>(a: T[]) => {
   return b
 }
 
-export function Flashcards() {
+export function Flashcards({ deck: deckParam, card: cardParam }: { deck?: string; card?: number } = {}) {
   const [deckId, setDeckId] = useState<string | null>(null)
   const [known, setKnown] = useState<number[]>([])
   const [queue, setQueue] = useState<number[]>([])
@@ -69,18 +73,25 @@ export function Flashcards() {
   const deck = DECKS.find((d) => d.id === deckId) ?? null
 
   const start = useCallback(
-    (id: string, onlyNew: boolean) => {
+    (id: string, onlyNew: boolean, first?: number) => {
       const d = DECKS.find((x) => x.id === id)!
       const k = readKnown(id)
-      const all = d.cards.map((_, i) => i).filter((i) => !onlyNew || !k.includes(i))
+      const all = d.cards.map((_, i) => i).filter((i) => (!onlyNew || !k.includes(i)) && i !== first)
+      const order = mix ? shuffle(all) : all
       setDeckId(id)
       setKnown(k)
-      setQueue(mix ? shuffle(all) : all)
-      setFlipped(false)
+      setQueue(first !== undefined && first < d.cards.length ? [first, ...order] : order)
+      setFlipped(first !== undefined)
       setAgain(0)
     },
     [mix],
   )
+
+  // A link from the search opens a deck at one card, answer side up.
+  useEffect(() => {
+    if (deckParam && DECKS.some((d) => d.id === deckParam)) start(deckParam, false, cardParam)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [deckParam, cardParam])
 
   const grade = useCallback(
     (ok: boolean) => {

@@ -1,47 +1,30 @@
-import { useCallback, useEffect, useMemo, useRef, useState, type ComponentType, type MouseEvent } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from 'react'
 import { CHAPTERS, LESSONS, lessonById } from './lessons/index'
-import { FLOWS } from './lessons/all'
-import type { LessonMeta } from './engine/types'
-import { FlowLessonView, WidgetLessonView } from './engine/LessonView'
-import { StageLessonView } from './engine/StageLesson'
-import { STAGES } from './lessons/stages'
-import { QUESTIONS } from './data/quiz'
-import { RackTour } from './widgets/RackTour'
-import { ServerAnatomy } from './widgets/ServerAnatomy'
-import { BomCheck } from './widgets/BomCheck'
-import { Outlier } from './widgets/Outlier'
-import { Jumbo } from './widgets/Jumbo'
-import { BondFailover } from './widgets/BondFailover'
-import { TestTypes } from './widgets/TestTypes'
-import { RaidDrives } from './widgets/RaidDrives'
+import { QUESTIONS, TOPICS } from './data/quiz'
+import { TOOLS } from './data/tools'
 import { Home } from './pages/Home'
-import { Labs } from './pages/Labs'
 import { DataCenter } from './explore/DataCenter'
-import { Practice } from './pages/Practice'
-import { RackLab } from './pages/RackLab'
 import { Cheatsheets, SHEETS } from './pages/Cheatsheets'
 import { Assistant, setAssistantContext } from './assistant/Assistant'
 import { useDone, useStored } from './progress'
 import { LANGS, setLang, useLang, useT } from './i18n'
 import { SITE } from './site'
 
-const WIDGETS: Record<string, ComponentType<{ meta: LessonMeta }>> = {
-  'rack-tour': RackTour,
-  'server-anatomy': ServerAnatomy,
-  'bom-check': BomCheck,
-  outlier: Outlier,
-  jumbo: Jumbo,
-  bond: BondFailover,
-  'test-types': TestTypes,
-  'raid-drives': RaidDrives,
-}
+// Pages that load on first visit: lessons, games, the lab pages and the toolbox.
+const LessonRoute = lazy(() => import('./LessonRoute'))
+const Practice = lazy(() => import('./pages/Practice').then((m) => ({ default: m.Practice })))
+const RackLab = lazy(() => import('./pages/RackLab').then((m) => ({ default: m.RackLab })))
+const Labs = lazy(() => import('./pages/Labs').then((m) => ({ default: m.Labs })))
+const Toolbox = lazy(() => import('./pages/Toolbox').then((m) => ({ default: m.Toolbox })))
 
-export type PracticeTab = 'shift' | 'build' | 'raid' | 'patch' | 'pipes' | 'hunt' | 'quiz' | 'cards'
+
+export type PracticeTab = 'shift' | 'build' | 'raid' | 'patch' | 'walk' | 'pipes' | 'hunt' | 'quiz' | 'cards'
 
 type Route =
   | { page: 'home' }
   | { page: 'lesson'; id: string }
-  | { page: 'practice'; tab: PracticeTab }
+  | { page: 'practice'; tab: PracticeTab; deck?: string; card?: number }
+  | { page: 'toolbox'; mode: 'wall' | 'pack'; tool?: string }
   | { page: 'lab' }
   | { page: 'sheets' }
   | { page: 'labs' }
@@ -55,8 +38,15 @@ function parse(hash: string): Route {
   if (h === '/practice/build') return { page: 'practice', tab: 'build' }
   if (h === '/practice/raid' || h === '/raid') return { page: 'practice', tab: 'raid' }
   if (h === '/practice/patch' || h === '/patch') return { page: 'practice', tab: 'patch' }
+  if (h === '/practice/walk' || h === '/walk') return { page: 'practice', tab: 'walk' }
   if (h === '/practice/pipes' || h === '/pipes') return { page: 'practice', tab: 'pipes' }
   if (h === '/practice/cards' || h === '/flashcards') return { page: 'practice', tab: 'cards' }
+  const cm = h.match(/^\/practice\/cards\/([\w-]+)(?:\/(\d+))?$/)
+  if (cm) return { page: 'practice', tab: 'cards', deck: cm[1], card: cm[2] !== undefined ? Number(cm[2]) : undefined }
+  if (h === '/toolbox') return { page: 'toolbox', mode: 'wall' }
+  if (h === '/toolbox/pack') return { page: 'toolbox', mode: 'pack' }
+  const tm = h.match(/^\/toolbox\/([\w-]+)$/)
+  if (tm) return { page: 'toolbox', mode: 'wall', tool: tm[1] }
   if (h === '/practice/hunt' || h === '/hunt') return { page: 'practice', tab: 'hunt' }
   if (h === '/practice/quiz') return { page: 'practice', tab: 'quiz' }
   if (h === '/lab') return { page: 'lab' }
@@ -97,6 +87,7 @@ const ICON = {
   target: 'M12 3a9 9 0 1 1 0 18 9 9 0 0 1 0-18zM12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8z',
   rack: 'M6 3h12v18H6zM6 8h12M6 13h12M9 5.5h.01M9 10.5h.01M9 15.5h.01',
   sheet: 'M5 3h10l4 4v14H5zM8 11h8M8 15h8M8 7h4',
+  tool: 'M14.7 6.3a4 4 0 0 0-5.4 5.2L3.5 17.3a1.8 1.8 0 0 0 2.6 2.6l5.8-5.8a4 4 0 0 0 5.2-5.4l-2.5 2.5-2.4-.4-.4-2.4z',
   github: 'M9 19c-4 1.5-4-2-6-2.5M15 21v-3.5a3 3 0 0 0-.9-2.4c3-.3 6.1-1.5 6.1-6.6a5.2 5.2 0 0 0-1.4-3.6 4.8 4.8 0 0 0-.1-3.6s-1.1-.4-3.7 1.4a12.6 12.6 0 0 0-6.6 0C5.8 1.3 4.7 1.7 4.7 1.7a4.8 4.8 0 0 0-.1 3.6A5.2 5.2 0 0 0 3.2 8.9c0 5.1 3.1 6.3 6.1 6.6A3 3 0 0 0 8.4 18v3',
 }
 
@@ -122,11 +113,15 @@ function Search({ go }: { go: (h: string) => void }) {
       { hash: '#/practice', title: 'Rack Shift', sub: 'Game: build, cable, test and ship three racks', kind: 'Practice', hay: 'rack shift game build cable burn-in report ship integration play' },
       { hash: '#/practice/build', title: 'Build a server', sub: 'Assemble a two-socket server from the order, then power it on', kind: 'Practice', hay: 'build server assemble cpu dimm memory population nvme psu fan heatsink esd game' },
       { hash: '#/practice/raid', title: 'RAID Rescue', sub: 'Game: ten arrays per shift. Survive or lose, capacity, XOR rebuilds, pick the level', kind: 'Practice', hay: 'raid rescue game parity xor capacity rebuild degraded mirror stripe level jbod' },
+      { hash: '#/practice/walk', title: 'Floor walk', sub: 'Game: walk the cold aisle, the hot aisle and the corridor, spot what is wrong and act', kind: 'Practice', hay: 'floor walk game rounds safety security blanking panel tile water pdu tailgating visitor epo extinguisher containment data center technician' },
+      { hash: '#/toolbox', title: 'Toolbox', sub: `${TOOLS.length} tools of the job: what, when and how`, kind: 'Toolbox', hay: 'toolbox tools kit belt fibre copper console safety software vendor supermicro' },
+      { hash: '#/toolbox/pack', title: 'Pack the bag', sub: 'Game: read the work order, pack the tools the job needs', kind: 'Practice', hay: 'pack the bag game tools work order kit' },
+      ...TOOLS.map((tl) => ({ hash: `#/toolbox/${tl.id}`, title: tl.name, sub: tl.what, kind: 'Tool', hay: `${tl.name} ${tl.what} ${tl.when} tool` })),
       { hash: '#/practice/patch', title: 'Patch it', sub: 'Game: work orders on the floor. Pick the optic and cable, fix polarity, read the light', kind: 'Practice', hay: 'patch it game fibre fiber optic dac aoc polarity light dbm cleaning cabling work order data center technician' },
       { hash: '#/practice/pipes', title: 'Pipe puzzle', sub: 'Game: build the Linux pipeline that answers the question', kind: 'Practice', hay: 'pipe puzzle linux bash grep awk sort uniq wc head game commands' },
       { hash: '#/practice/cards', title: 'Flashcards', sub: 'Interview questions, RAID, commands and every term, part by part', kind: 'Practice', hay: 'flashcards cards terms memorize study interview questions deck' },
       { hash: '#/practice/hunt', title: 'Fault hunt', sub: 'One hidden fault, a terminal, the clock', kind: 'Practice', hay: 'fault hunt game practice terminal' },
-      { hash: '#/practice/quiz', title: 'Quiz', sub: `${QUESTIONS.length} questions in nine topics`, kind: 'Practice', hay: 'quiz questions test interview raid power linux troubleshooting' },
+      { hash: '#/practice/quiz', title: 'Quiz', sub: `${QUESTIONS.length} questions in ${TOPICS.length} topics`, kind: 'Practice', hay: 'quiz questions test interview raid power linux troubleshooting safety network' },
       { hash: '#/lab', title: 'Rack Lab', sub: 'Build a rack that passes integration', kind: 'Lab', hay: 'rack lab build pdu power blanking design' },
       { hash: '#/explore/C/C01/node01', title: 'Inside a server', sub: 'Every part of a 1U two-socket server: click it for what it is and how it is checked', kind: 'Explore', hay: 'inside server parts anatomy motherboard cpu socket upi numa dimm rdimm ecc riser pcie nic hba raid m.2 backplane fans sensors psu bmc bios serial fru chassis' },
       { hash: '#/explore', title: 'Data center explorer', sub: 'Zoom from the data hall into a row, a rack and a server', kind: 'Explore', hay: 'data center hall row rack server aisle cooling power ups crah busway explore zoom' },
@@ -135,8 +130,29 @@ function Search({ go }: { go: (h: string) => void }) {
     ],
     [],
   )
+  // The 188 terms of the flashcard decks load on first use of the search, to keep the first page small.
+  const [terms, setTerms] = useState<(Hit & { hay: string })[]>([])
+  const loadTerms = useCallback(() => {
+    if (terms.length) return
+    import('./data/terms')
+      .then(({ TERMS }) =>
+        setTerms(
+          TERMS.flatMap((p) =>
+            p.terms.map((tm, i) => ({ hash: `#/practice/cards/terms-${p.part}/${i}`, title: tm.t, sub: tm.d.length > 110 ? `${tm.d.slice(0, 108)}…` : tm.d, kind: 'Term', hay: `${tm.t} ${tm.d} term` })),
+          ),
+        ),
+      )
+      .catch(() => undefined)
+  }, [terms.length])
   const words = q.toLowerCase().split(/\s+/).filter(Boolean)
-  const hits = words.length ? all.filter((h) => words.every((w) => h.hay.toLowerCase().includes(w))).slice(0, 9) : []
+  // Match at the start of a word, so "mpo" finds MPO but not "composite".
+  const pool = useMemo(() => [...all, ...terms].map((h) => ({ ...h, norm: ` ${`${h.title} ${h.hay}`.toLowerCase().replace(/[^a-z0-9./+#-]+/g, ' ')}` })), [all, terms])
+  const hits = words.length
+    ? pool
+        .filter((h) => words.every((w) => h.norm.includes(` ${w}`)))
+        .sort((a, b) => Number(b.title.toLowerCase().includes(words[0])) - Number(a.title.toLowerCase().includes(words[0])))
+        .slice(0, 9)
+    : []
 
   useEffect(() => {
     const on = (e: KeyboardEvent) => {
@@ -144,11 +160,12 @@ function Search({ go }: { go: (h: string) => void }) {
         e.preventDefault()
         ref.current?.focus()
         setOpen(true)
+        loadTerms()
       }
     }
     window.addEventListener('keydown', on)
     return () => window.removeEventListener('keydown', on)
-  }, [])
+  }, [loadTerms])
 
   const choose = (h: Hit) => {
     go(h.hash)
@@ -172,7 +189,10 @@ function Search({ go }: { go: (h: string) => void }) {
           setSel(0)
           setOpen(true)
         }}
-        onFocus={() => setOpen(true)}
+        onFocus={() => {
+          setOpen(true)
+          loadTerms()
+        }}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onKeyDown={(e) => {
           if (e.key === 'Escape') {
@@ -208,7 +228,7 @@ function Search({ go }: { go: (h: string) => void }) {
 
 /* ---------- course tree and progress ---------- */
 
-const PRACTICE_IDS = ['rack-shift', 'server-build', 'raid-rescue', 'patch-it', 'pipe-puzzle', 'fault-hunt', 'quiz', 'flashcards', 'rack-lab']
+const PRACTICE_IDS = ['rack-shift', 'server-build', 'raid-rescue', 'patch-it', 'floor-walk', 'pack-bag', 'pipe-puzzle', 'fault-hunt', 'quiz', 'flashcards', 'rack-lab']
 
 function Folder({ color, open }: { color: string; open: boolean }) {
   return (
@@ -406,7 +426,7 @@ export function App() {
     setNavOpen(false)
     document.querySelector('.main')?.scrollTo({ top: 0 })
     const lesson = route.page === 'lesson' ? lessonById(route.id) : null
-    const titles: Record<string, string> = { practice: 'Practice', lab: 'Rack Lab', sheets: 'Cheatsheets', labs: 'Run it yourself', explore: 'Data center explorer' }
+    const titles: Record<string, string> = { practice: 'Practice', lab: 'Rack Lab', sheets: 'Cheatsheets', labs: 'Run it yourself', explore: 'Data center explorer', toolbox: 'Toolbox' }
     document.title = lesson ? `${lesson.title} · ${SITE.title}` : titles[route.page] ? `${titles[route.page]} · ${SITE.title}` : SITE.title
     setAssistantContext(lesson ? { page: lesson.title, text: lesson.blurb } : { page: route.page, text: '' })
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -420,32 +440,27 @@ export function App() {
   const isDark = theme ? theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches
   const toggleTheme = () => setTheme(isDark ? 'light' : 'dark')
 
-  const tab = route.page === 'practice' ? 'practice' : route.page === 'lab' ? 'lab' : route.page === 'sheets' ? 'sheets' : 'learn'
+  const tab = route.page === 'practice' ? 'practice' : route.page === 'lab' ? 'lab' : route.page === 'sheets' ? 'sheets' : route.page === 'toolbox' ? 'toolbox' : 'learn'
+
+  // Fetch the lesson chunk in the background once the first page is up, so the first lesson opens at once.
+  useEffect(() => {
+    const id = window.setTimeout(() => void import('./LessonRoute').catch(() => undefined), 1500)
+    return () => window.clearTimeout(id)
+  }, [])
   const firstLesson = `#/lesson/${LESSONS[0].id}`
 
   let main
   let full = false
-  if (route.page === 'lesson') {
-    const meta = lessonById(route.id)!
-    const W = WIDGETS[meta.id]
-    main =
-      meta.kind === 'flow' && FLOWS[meta.id] ? (
-        <FlowLessonView key={meta.id} meta={meta} flow={FLOWS[meta.id]} />
-      ) : meta.kind === 'stage' && STAGES[meta.id] ? (
-        <StageLessonView key={meta.id} meta={meta} def={STAGES[meta.id]} />
-      ) : W ? (
-        <WidgetLessonView key={meta.id} meta={meta}>
-          <W meta={meta} />
-        </WidgetLessonView>
-      ) : null
-  } else {
+  if (route.page === 'lesson') main = <LessonRoute id={route.id} />
+  else {
     full = true
     if (route.page === 'home') main = <Home go={go} />
-    else if (route.page === 'practice') main = <Practice tab={route.tab} go={go} />
+    else if (route.page === 'practice') main = <Practice tab={route.tab} go={go} deck={route.deck} card={route.card} />
     else if (route.page === 'lab') main = <RackLab />
     else if (route.page === 'sheets') main = <Cheatsheets />
     else if (route.page === 'labs') main = <Labs go={go} />
     else if (route.page === 'explore') main = <DataCenter go={go} path={route.path} />
+    else if (route.page === 'toolbox') main = <Toolbox mode={route.mode} tool={route.tool} go={go} />
     else
       main = (
         <div className="page">
@@ -483,6 +498,10 @@ export function App() {
           <a href="#/lab" onClick={link('#/lab')} className={tab === 'lab' ? 'on' : ''}>
             <Svg d={ICON.rack} size={15} />
             {t('lab')}
+          </a>
+          <a href="#/toolbox" onClick={link('#/toolbox')} className={tab === 'toolbox' ? 'on' : ''}>
+            <Svg d={ICON.tool} size={15} />
+            {t('toolbox')}
           </a>
           <a href="#/cheatsheets" onClick={link('#/cheatsheets')} className={tab === 'sheets' ? 'on' : ''}>
             <Svg d={ICON.sheet} size={15} />
@@ -544,7 +563,9 @@ export function App() {
         <aside className={`course${navOpen ? ' is-open' : ''}`}>
           <CourseNav route={route} link={link} />
         </aside>
-        <main className={`main${full ? ' is-page' : ''}`}>{main}</main>
+        <main className={`main${full ? ' is-page' : ''}`}>
+          <Suspense fallback={<div className="page-loading muted">Loading…</div>}>{main}</Suspense>
+        </main>
       </div>
       <Assistant />
     </div>
